@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - OmniBank & Ultimate Suite</title>
+    <title>InvestMind AI - Public & Private OmniBank</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 15px; }
@@ -43,39 +43,47 @@
 </head>
 <body>
     <div class="container">
-        <h1>InvestMind AI <span class="badge">OMNIBANK</span></h1>
-        <p class="subtitle">Robo-Advisor com Seleção de Instituição, Objetivos e Multi-Estratégia</p>
+        <h1>InvestMind AI <span class="badge">PUBLIC & PRIVATE</span></h1>
+        <p class="subtitle">Robo-Advisor com Bancos Públicos, Privados, Dividendos e Renda Passiva</p>
         
         <div class="grid-2">
             <div class="form-group">
                 <label>Capital Inicial (R$)</label>
-                <input type="number" id="capital" value="20000">
+                <input type="number" id="capital" value="25000">
             </div>
             <div class="form-group">
                 <label>Aporte Mensal (R$)</label>
-                <input type="number" id="monthly" value="1000">
+                <input type="number" id="monthly" value="1200">
             </div>
         </div>
 
         <div class="grid-2">
             <div class="form-group">
-                <label>Banco / Corretora de Origem</label>
+                <label>Instituição (Públicos, Privados & Corretoras)</label>
                 <select id="bank">
-                    <option value="nubank">Nubank (Caixinhas / Renda Fixa)</option>
-                    <option value="xp" selected>XP Investimentos (Plataforma Completa)</option>
-                    <option value="btg">BTG Pactual (Private & Digital)</option>
-                    <option value="inter">Banco Inter (Super App / Global)</option>
-                    <option value="clear">Clear Corretora (Foco em Renda Variável)</option>
-                    <option value="avenue">Avenue (Investimento Internacional Direto)</option>
+                    <optgroup label="🏦 Bancos Públicos Nacionais">
+                        <option value="bb" selected>Banco do Brasil (BB) - Ações & Renda Fixa</option>
+                        <option value="caixa">Caixa Econômica Federal - Poupança/FGTS/Habitação</option>
+                        <option value="bnb">Banco do Nordeste (BNB) - Desenvolvimento Regional</option>
+                        <option value="basa">Banco da Amazônia (BASA) - Fundo Constitucional</option>
+                        <option value="bndes">BNDES - Financiamento de Longo Prazo</option>
+                    </optgroup>
+                    <optgroup label="💼 Bancos Privados & Corretoras">
+                        <option value="nubank">Nubank (Caixinhas / RDB)</option>
+                        <option value="xp">XP Investimentos (Plataforma Completa)</option>
+                        <option value="btg">BTG Pactual (Private & Digital)</option>
+                        <option value="inter">Banco Inter (Super App / Global)</option>
+                        <option value="avenue">Avenue (Investimento Internacional Direto)</option>
+                    </optgroup>
                 </select>
             </div>
             <div class="form-group">
                 <label>Objetivo Financeiro</label>
                 <select id="goalType">
                     <option value="aposentadoria">Aposentadoria de Longo Prazo</option>
-                    <option value="imovel" selected>Compra de Imóvel / Terreno</option>
+                    <option value="imovel">Compra de Imóvel / Terreno</option>
+                    <option value="rendapassiva" selected>Geração de Renda Passiva / Dividendos</option>
                     <option value="emergencia">Reserva de Emergência Sólida</option>
-                    <option value="viagem">Viagem ou Projeto de Curto Prazo</option>
                 </select>
             </div>
         </div>
@@ -102,7 +110,7 @@
         <div class="grid-2">
             <div class="form-group">
                 <label>Meta de Patrimônio (R$)</label>
-                <input type="number" id="goal" value="150000">
+                <input type="number" id="goal" value="200000">
             </div>
             <div class="form-group">
                 <label>Inflação Estimada (% a.a.)</label>
@@ -111,22 +119,23 @@
         </div>
 
         <div class="btn-group">
-            <button onclick="analyze()">Executar Análise OmniBank</button>
+            <button onclick="analyze()">Executar Análise Completa</button>
             <button class="secondary" onclick="window.print()">Exportar PDF</button>
         </div>
 
         <div id="resultBox" class="result">
-            <h3>Relatório Estratégico Multi-Banco</h3>
+            <h3>Relatório Estratégico Executivo</h3>
             <p><strong>Instituição Selecionada:</strong> <span id="resBankName" class="highlight"></span></p>
             <p><strong>Foco do Objetivo:</strong> <span id="resGoalName" class="highlight"></span></p>
-            <p><strong>Distribuição Recomendada para a Corretora:</strong></p>
+            <p><strong>Alocação Estratégica na Instituição:</strong></p>
             <ul id="resAlloc"></ul>
             <p><strong>Projeção Nominal (1 Ano):</strong> <span id="resProjNom" class="highlight"></span></p>
             <p><strong>Projeção Real (Poder de Compra):</strong> <span id="resProjReal" class="highlight"></span></p>
+            <p><strong>Estimativa de Renda Passiva Mensal (1 Ano):</strong> <span id="resPassiveIncome" class="highlight"></span></p>
             <p><strong>Tempo Estimado para Atingir a Meta:</strong> <span id="resGoalTime" class="highlight"></span></p>
             
             <div style="margin-top: 15px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;">
-                <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px;">Recomendação Operacional da Instituição</h4>
+                <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px;">Diretriz Operacional da Instituição</h4>
                 <p style="font-size: 13px; margin: 0; color: #94a3b8;" id="bankAdvice"></p>
             </div>
 
@@ -152,31 +161,35 @@
         let doughnutChart = null;
 
         const bankDetails = {
+            bb: { name: "Banco do Brasil (BB)", advice: "Excelente para alocação em Ações pagadoras de dividendos (BBAS3) e Tesouro Direto/CDBs com solidez estatal." },
+            caixa: { name: "Caixa Econômica Federal", advice: "Foco em fundos imobiliários geridos pela Caixa e aplicações em LCI/LCA isentas de Imposto de Renda." },
+            bnb: { name: "Banco do Nordeste (BNB)", advice: "Forte atuação em financiamentos produtivos regionais e títulos de renda fixa atrelados ao desenvolvimento local." },
+            basa: { name: "Banco da Amazônia (BASA)", advice: "Especializado em fundos constitucionais de financiamento e investimentos em ativos sustentáveis e regionais." },
+            bndes: { name: "BNDES", advice: "Foco institucional em grandes projetos de infraestrutura, debêntures de longo prazo e fomento industrial." },
             nubank: { name: "Nubank (Caixinhas / RDB)", advice: "Ideal alocar em RDB Diário e Fundos DI automáticos sem taxa de custódia." },
-            xp: { name: "XP Investimentos", advice: "Aproveite a mesa de Renda Fixa para CDBs bancários premiados e COE/FIIs." },
+            xp: { name: "XP Investimentos", advice: "Aproveite a mesa de Renda Fixa para CDBs bancários premiados e FIIs." },
             btg: { name: "BTG Pactual", advice: "Excelente para fundos de infraestrutura (Debêntures Incentivadas) isentos de IR." },
             inter: { name: "Banco Inter", advice: "Use o Super App para concentrar CDBs de liquidez diária e Ações globais sem corretagem." },
-            clear: { name: "Clear Corretora", advice: "Foco absoluto em Day Trade e custódia zero para Ações e Fundos Imobiliários na B3." },
             avenue: { name: "Avenue Securities", advice: "Perfeito para compra direta de ações nos EUA, REITs e ETFs globais em Dólar." }
         };
 
         const goalDetails = {
             aposentadoria: "Aposentadoria de Longo Prazo (Foco em juros compostos e previdência/IPCA+)",
             imovel: "Aquisição de Imóvel / Terreno (Foco em liquidez moderada e rentabilidade pré/pós-fixada)",
-            emergencia: "Reserva de Emergência Sólida (Liquidez diária obrigatória em ativos seguros)",
-            viagem: "Viagem ou Projeto de Curto Prazo (Proteção de capital contra volatilidade da bolsa)"
+            rendapassiva: "Geração de Renda Passiva / Dividendos (Foco em ativos geradores de caixa mensal/trimestral)",
+            emergencia: "Reserva de Emergência Sólida (Liquidez diária obrigatória em ativos seguros)"
         };
 
         function saveHistory(data, capital, bank) {
-            let history = JSON.parse(localStorage.getItem('investmind_omnibank_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_public_history') || '[]');
             history.unshift({ date: new Date().toLocaleDateString(), capital, bank: bank.toUpperCase(), projected: data.projectedNominal });
             if (history.length > 5) history.pop();
-            localStorage.setItem('investmind_omnibank_history', JSON.stringify(history));
+            localStorage.setItem('investmind_public_history', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('investmind_omnibank_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_public_history') || '[]');
             const box = document.getElementById('historyBox');
             const list = document.getElementById('historyList');
             if (history.length === 0) { box.style.display = 'none'; return; }
@@ -192,7 +205,7 @@
         }
 
         function clearHistory() {
-            localStorage.removeItem('investmind_omnibank_history');
+            localStorage.removeItem('investmind_public_history');
             loadHistory();
         }
 
@@ -223,9 +236,11 @@
                 let monthlyRate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
                 let nominal1Year = Number(r.projectedValue1Year);
                 let real1Year = (nominal1Year / Math.pow(1 + inflationRate, 1)).toFixed(2);
+                let estimatedPassiveIncome = (nominal1Year * 0.008).toFixed(2); // Estimativa de 0.8% ao mês sobre o montante acumulado em dividendos/renda fixa
 
                 document.getElementById('resProjNom').innerText = 'R$ ' + nominal1Year;
                 document.getElementById('resProjReal').innerText = 'R$ ' + real1Year + ' (Poder de compra corrigido)';
+                document.getElementById('resPassiveIncome').innerText = 'R$ ' + estimatedPassiveIncome + ' / mês (Estimativa)';
 
                 let currentVal = capital;
                 let months = 0;

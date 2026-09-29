@@ -1,9 +1,17 @@
-// server.js
 import express from 'express';
 import { analyzeInvestmentProfile } from './agentCore.js';
 
 const app = express();
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'online', 
+    name: 'InvestMind-AI API', 
+    description: 'Agente de Inteligência Financeira e Robo-Advisor',
+    endpoints: ['POST /api/analyze'] 
+  });
+});
 
 app.post('/api/analyze', (req, res) => {
   try {
@@ -18,6 +26,7 @@ app.post('/api/analyze', (req, res) => {
   }
 });
 
-app.listen(3002, () => {
-  console.log('📈 InvestMind AI a rodar na porta 3002');
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => {
+  console.log(`📈 InvestMind AI a rodar na porta ${PORT}`);
 });

@@ -39,15 +39,32 @@ export default function InvestMindEliteUI() {
     const rebalanceamento = calcularAporteRebalanceamento(carteiraAtual, alocacao, aporte);
     const alertas = verificarAlertasDesvio(carteiraAtual, alocacao);
 
-    // 1. Calculadora de Impacto Tributário (Estimativa Alíquota Média 15% LP / 22.5% CP)
-    const impostoEstimado = (monteCarlo.mediano - capital) * 0.15;
-    const liquidoComTributo = monteCarlo.mediano - impostoEstimado;
+    // 1. Otimizador de Alocação por Classe de Ativos
+    const otimizacaoClasses = {
+      rendaFixa: capital * (alocacao.rendaFixa || 0.5),
+      acoesBrasil: capital * (alocacao.acoesBrasil || 0.3),
+      exterior: capital * (alocacao.exterior || 0.2)
+    };
 
-    // 2. Comparativo Institucional de Custódia
-    const taxaCustodia = instituicao.includes('Banco do Brasil') || instituicao.includes('Caixa') ? 0.005 : 0.0;
-    const impactoTaxa = capital * taxaCustodia * 20;
+    // 2. Comparador de Taxas e Custódia Institucional
+    const taxaCustodiaAnual = instituicao.includes('Banco do Brasil') || instituicao.includes('Caixa') ? 0.004 : 0.0;
+    const impactoTaxa20Anos = capital * taxaCustodiaAnual * 20;
 
-    setResultado({ monteCarlo, alocacao, metasFire, rebalanceamento, alertas, estado, liquidoComTributo, impostoEstimado, impactoTaxa });
+    // 3. Simulador de Rentabilidade Líquida Ajustada (Descontando imposto e taxas)
+    const impostoRendaEstimado = (monteCarlo.mediano - capital) * 0.15;
+    const liquidoFinalAjustado = monteCarlo.mediano - impostoRendaEstimado - impactoTaxa20Anos;
+
+    setResultado({ 
+      monteCarlo, 
+      alocacao, 
+      metasFire, 
+      rebalanceamento, 
+      alertas, 
+      estado, 
+      otimizacaoClasses,
+      taxaCustodiaAnual,
+      liquidoFinalAjustado 
+    });
     setNotificacaoEnviada(false);
   };
 
@@ -55,16 +72,18 @@ export default function InvestMindEliteUI() {
     if (!resultado) return;
     const conteudoHtml = `
       <html>
-        <head><title>InvestMind AI - Relatório Nota 10 Elite</title></head>
+        <head><title>InvestMind AI - Relatório Integrado Elite</title></head>
         <body style="font-family: Arial; padding: 20px; background: #0f172a; color: #f8fafc;">
-          <h1>InvestMind AI - Relatório Nota 10 Elite</h1>
+          <h1>InvestMind AI - Relatório Consolidado</h1>
           <p><strong>Instituição:</strong> ${resultado.estado.instituicao} | <strong>Perfil:</strong> ${resultado.estado.perfilRisco}</p>
           <hr style="border-color: #334155;"/>
-          <h3>Projeção 20 Anos (Monte Carlo Líquido de Impostos)</h3>
-          <p>Mediano Bruto: R$ ${resultado.monteCarlo.mediano.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p>Imposto Estimado (IR): R$ ${resultado.impostoEstimado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p><strong>Patrimônio Líquido Final:</strong> R$ ${resultado.liquidoComTributo.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p><strong>Chance de Sucesso da Meta:</strong> ${resultado.monteCarlo.chanceSucesso.toFixed(1)}%</p>
+          <h3>Otimização de Portfólio & Líquido Ajustado</h3>
+          <p>Patrimônio Líquido Final (P50): R$ ${resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <p>Taxa de Custódia Institucional: ${(resultado.taxaCustodiaAnual * 100).toFixed(2)}% ao ano</p>
+          <h3>Alocação Ideal por Classe</h3>
+          <p>Renda Fixa: R$ ${resultado.otimizacaoClasses.rendaFixa.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <p>Ações Brasil: R$ ${resultado.otimizacaoClasses.acoesBrasil.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <p>Ativos Internacionais / Exterior: R$ ${resultado.otimizacaoClasses.exterior.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </body>
       </html>
     `;
@@ -78,7 +97,7 @@ export default function InvestMindEliteUI() {
 
   const enviarRelatorioWhatsApp = () => {
     if (!resultado) return;
-    const texto = encodeURIComponent(`*InvestMind AI - Relatório Elite*\nInstituição: ${instituicao}\nPatrimônio Líquido Projetado: R$ ${resultado.liquidoComTributo.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`);
+    const texto = encodeURIComponent(`*InvestMind AI - Relatório Consolidado*\nLíquido Ajustado: R$ ${resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}\nInstituição: ${instituicao}`);
     window.open(`https://api.whatsapp.com/send?phone=${telefone}&text=${texto}`, '_blank');
     setNotificacaoEnviada(true);
   };
@@ -87,8 +106,8 @@ export default function InvestMindEliteUI() {
     <div className="p-6 bg-slate-950 text-slate-100 rounded-2xl max-w-4xl mx-auto space-y-6 shadow-2xl border border-slate-900">
       <div className="border-b border-slate-800 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Nota 10 Ultra Suite</span></h2>
-          <p className="text-sm text-slate-400">Simulação Avançada, Eficiência Tributária, Multi-Bancos & Rebalanceamento</p>
+          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Elite 3-em-1 Suite</span></h2>
+          <p className="text-sm text-slate-400">Otimizador de Classes, Comparador Institucional & Rentabilidade Líquida</p>
         </div>
       </div>
 
@@ -132,7 +151,7 @@ export default function InvestMindEliteUI() {
 
       <div className="flex gap-3">
         <button onClick={executarAnaliseElite} className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-xl transition shadow-lg shadow-cyan-900/30">
-          Executar Análise Nota 10 Ultra
+          Executar Análise Consolidada 3-em-1
         </button>
         {resultado && (
           <button onClick={exportarPDF} className="px-5 py-3 bg-slate-800 hover:bg-slate-700 font-bold rounded-xl transition border border-slate-700 text-cyan-300">
@@ -143,27 +162,28 @@ export default function InvestMindEliteUI() {
 
       {resultado && (
         <div className="space-y-4 bg-slate-900/90 p-5 rounded-xl border border-slate-800 animate-fadeIn">
-          <h3 className="text-lg font-semibold text-cyan-300">📊 Relatório Institucional & Simulação Tributária</h3>
+          <h3 className="text-lg font-semibold text-cyan-300">📊 Resultados dos 3 Módulos Integrados</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-              <h4 className="font-bold text-slate-300 mb-1">💼 Monte Carlo & Líquido de IR</h4>
-              <p>🟢 Mediano Bruto: R$ {resultado.monteCarlo.mediano.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-red-400">📉 IR Estimado (15%): - R$ {resultado.impostoEstimado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-emerald-400 font-bold">✨ Líquido Final: R$ {resultado.liquidoComTributo.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-cyan-400 font-bold pt-1">Chance de Sucesso: {resultado.monteCarlo.chanceSucesso.toFixed(1)}%</p>
+              <h4 className="font-bold text-slate-300 mb-1">🎯 1 & 3. Otimização & Líquido Final</h4>
+              <p className="text-emerald-400 font-bold">Líquido Ajustado (20 anos): R$ {resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-xs text-slate-400">Renda Fixa: R$ {resultado.otimizacaoClasses.rendaFixa.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-xs text-slate-400">Ações BR: R$ {resultado.otimizacaoClasses.acoesBrasil.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-xs text-slate-400">Exterior: R$ {resultado.otimizacaoClasses.exterior.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-              <h4 className="font-bold text-slate-300 mb-1">🏦 Análise Institucional ({instituicao})</h4>
-              <p className="text-slate-300">Taxa Custódia Efetiva: <span className="font-mono text-cyan-400">{instituicao.includes('Banco do Brasil') || instituicao.includes('Caixa') ? '0.50% a.a.' : 'Isento / 0%'}</span></p>
-              <p className="text-slate-400 text-xs">Otimização de rotas de liquidez via Open Finance aplicada com sucesso para os motores de renda fixa e fundos imobiliários.</p>
+              <h4 className="font-bold text-slate-300 mb-1">🏦 2. Comparativo Institucional</h4>
+              <p className="text-slate-300">Instituição: <span className="text-cyan-400 font-bold">{instituicao}</span></p>
+              <p className="text-slate-300">Taxa de Custódia: <span className="font-mono text-amber-400">{(resultado.taxaCustodiaAnual * 100).toFixed(2)}% a.a.</span></p>
+              <p className="text-xs text-slate-400 pt-1">Simulação otimizada com motores de rebalanceamento automático e alertas de desvio ativados.</p>
             </div>
           </div>
 
           <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="w-full">
-              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Enviar Relatório via WhatsApp</h4>
+              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Enviar Relatório Consolidado via WhatsApp</h4>
               <input 
                 type="text" 
                 placeholder="Seu WhatsApp (ex: 5583999999999)" 

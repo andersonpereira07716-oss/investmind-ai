@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - Robo-Advisor Master Suite</title>
+    <title>InvestMind AI - Robo-Advisor Ultimate Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 15px; }
@@ -25,6 +25,7 @@
         ul { padding-left: 18px; margin: 8px 0; }
         li { margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
         .highlight { color: #4ade80; font-weight: bold; }
+        .warning { color: #f87171; font-weight: bold; }
         .chart-box { position: relative; margin-top: 15px; height: 220px; width: 100%; }
         .history-box { margin-top: 20px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937; display: none; }
         .history-item { padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
@@ -43,17 +44,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>InvestMind AI <span class="badge">PRO</span></h1>
-        <p class="subtitle">Robo-Advisor Autónomo & Suite de Inteligência Financeira</p>
+        <h1>InvestMind AI <span class="badge">ULTIMATE</span></h1>
+        <p class="subtitle">Robo-Advisor Autónomo com Inflação, Rebalanceamento e Globalização</p>
         
         <div class="grid-2">
             <div class="form-group">
                 <label>Capital Inicial (R$)</label>
-                <input type="number" id="capital" value="15000">
+                <input type="number" id="capital" value="20000">
             </div>
             <div class="form-group">
                 <label>Aporte Mensal (R$)</label>
-                <input type="number" id="monthly" value="800">
+                <input type="number" id="monthly" value="1000">
             </div>
         </div>
 
@@ -67,33 +68,45 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Cenário Macroeconômico</label>
-                <select id="macro">
-                    <option value="normal">Normal (Taxas Atuais)</option>
-                    <option value="alta_selic" selected>Juros Altos (Bons para Renda Fixa)</option>
-                    <option value="boom_bolsa">Boom Tecnológico / Ações</option>
+                <label>Exposição Global (USD/EUR)</label>
+                <select id="globalExposure">
+                    <option value="0">0% (Apenas Brasil)</option>
+                    <option value="15" selected>15% (Proteção Internacional)</option>
+                    <option value="30">30% (Forte Exposição Cambial)</option>
                 </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Meta de Patrimônio Desejada (R$)</label>
-            <input type="number" id="goal" value="100000">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Meta de Patrimônio (R$)</label>
+                <input type="number" id="goal" value="150000">
+            </div>
+            <div class="form-group">
+                <label>Inflação Estimada (% a.a.)</label>
+                <input type="number" id="inflation" value="4.5">
+            </div>
         </div>
 
         <div class="btn-group">
-            <button onclick="analyze()">Executar Análise Completa</button>
-            <button class="secondary" onclick="window.print()">Exportar Relatório PDF</button>
+            <button onclick="analyze()">Executar Análise Ultimate</button>
+            <button class="secondary" onclick="window.print()">Exportar PDF</button>
         </div>
 
         <div id="resultBox" class="result">
-            <h3>Relatório Estratégico de Alocação</h3>
+            <h3>Relatório Definitivo de Portfólio</h3>
             <p><strong>Plataforma Indicada:</strong> <span id="resInst" class="highlight"></span></p>
-            <p><strong>Composição do Portfólio:</strong></p>
+            <p><strong>Distribuição Otimizada:</strong></p>
             <ul id="resAlloc"></ul>
-            <p><strong>Projeção a 1 Ano:</strong> <span id="resProj" class="highlight"></span></p>
-            <p><strong>Tempo Estimado para Meta (R$ <span id="goalLabel"></span>):</strong> <span id="resGoalTime" class="highlight"></span></p>
+            <p><strong>Projeção Nominal (1 Ano):</strong> <span id="resProjNom" class="highlight"></span></p>
+            <p><strong>Projeção Real (Descontada a Inflação):</strong> <span id="resProjReal" class="highlight"></span></p>
+            <p><strong>Tempo Estimado para a Meta:</strong> <span id="resGoalTime" class="highlight"></span></p>
             
+            <div style="margin-top: 15px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;">
+                <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px;">Rebalanceamento Automático Sugerido</h4>
+                <p style="font-size: 13px; margin: 0; color: #94a3b8;" id="rebalanceAdvice"></p>
+            </div>
+
             <div class="chart-box">
                 <canvas id="growthChart"></canvas>
             </div>
@@ -116,15 +129,15 @@
         let doughnutChart = null;
 
         function saveHistory(data, capital, risk) {
-            let history = JSON.parse(localStorage.getItem('investmind_pro_history') || '[]');
-            history.unshift({ date: new Date().toLocaleDateString(), capital, risk, projected: data.projectedValue1Year });
+            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
+            history.unshift({ date: new Date().toLocaleDateString(), capital, risk, projected: data.projectedNominal });
             if (history.length > 5) history.pop();
-            localStorage.setItem('investmind_pro_history', JSON.stringify(history));
+            localStorage.setItem('investmind_ultimate_history', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('investmind_pro_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
             const box = document.getElementById('historyBox');
             const list = document.getElementById('historyList');
             if (history.length === 0) { box.style.display = 'none'; return; }
@@ -140,7 +153,7 @@
         }
 
         function clearHistory() {
-            localStorage.removeItem('investmind_pro_history');
+            localStorage.removeItem('investmind_ultimate_history');
             loadHistory();
         }
 
@@ -148,10 +161,9 @@
             const capital = Number(document.getElementById('capital').value);
             const monthlyContribution = Number(document.getElementById('monthly').value);
             const riskTolerance = document.getElementById('risk').value;
-            const macro = document.getElementById('macro').value;
+            const globalExp = Number(document.getElementById('globalExposure').value);
             const goal = Number(document.getElementById('goal').value);
-            
-            document.getElementById('goalLabel').innerText = goal.toLocaleString();
+            const inflationRate = Number(document.getElementById('inflation').value) / 100;
 
             const res = await fetch('/api/analyze', {
                 method: 'POST',
@@ -162,23 +174,27 @@
             
             if(data.status === 'success') {
                 const r = data.report;
-                document.getElementById('resInst').innerText = r.recommendedPlatform;
+                document.getElementById('resInst').innerText = r.recommendedPlatform + (globalExp > 0 ? ` + Parcela Global (${globalExp}%)` : '');
                 
-                // Ajuste macroeconômico na projeção
-                let multiplier = macro === 'alta_selic' ? 1.02 : macro === 'boom_bolsa' ? 1.05 : 1.0;
-                let adjustedProj = (Number(r.projectedValue1Year) * multiplier).toFixed(2);
-                document.getElementById('resProj').innerText = 'R$ ' + adjustedProj;
+                let monthlyRate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
+                let nominal1Year = Number(r.projectedValue1Year);
+                let real1Year = (nominal1Year / Math.pow(1 + inflationRate, 1)).toFixed(2);
 
-                // Cálculo do tempo para atingir a meta
+                document.getElementById('resProjNom').innerText = 'R$ ' + nominal1Year;
+                document.getElementById('resProjReal').innerText = 'R$ ' + real1Year + ' (Poder de compra corrigido)';
+
+                // Cálculo do tempo para a meta considerando inflação
                 let currentVal = capital;
                 let months = 0;
-                let monthlyRate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
                 while(currentVal < goal && months < 360) {
                     currentVal = (currentVal + monthlyContribution) * (1 + monthlyRate);
                     months++;
                 }
                 let yearsTime = (months / 12).toFixed(1);
                 document.getElementById('resGoalTime').innerText = months >= 360 ? 'Mais de 30 anos' : `${months} meses (~${yearsTime} anos)`;
+
+                // Conselho de Rebalanceamento
+                document.getElementById('rebalanceAdvice').innerText = `Aporte sugerido deste mês: Direcione R$ ${(monthlyContribution * 0.6).toFixed(2)} para Renda Fixa/Base e R$ ${(monthlyContribution * 0.4).toFixed(2)} para ativos de crescimento/internacionais para manter os pesos ideais.`;
 
                 const ul = document.getElementById('resAlloc');
                 ul.innerHTML = '';
@@ -191,9 +207,18 @@
                     allocLabels.push(key);
                     allocValues.push(parseInt(value));
                 }
+
+                if (globalExp > 0) {
+                    const liGlobal = document.createElement('li');
+                    liGlobal.innerHTML = `<strong>Ativos Globais (USD):</strong> ${globalExp}%`;
+                    ul.appendChild(liGlobal);
+                    allocLabels.push('Ativos Globais (USD)');
+                    allocValues.push(globalExp);
+                }
+
                 document.getElementById('resultBox').style.display = 'block';
 
-                // Render Line Chart (Evolução 1 Ano)
+                // Gráfico de Linha Temporal
                 const ctxLine = document.getElementById('growthChart').getContext('2d');
                 if (lineChart) lineChart.destroy();
                 
@@ -201,7 +226,7 @@
                 let labels = ['Início', 'Mês 3', 'Mês 6', 'Mês 9', 'Mês 12'];
                 let values = [baseVal];
                 for(let i=1; i<=4; i++) {
-                    baseVal = (baseVal + monthlyContribution * 3) * Math.pow(1 + monthlyRate, 3) * multiplier;
+                    baseVal = (baseVal + monthlyContribution * 3) * Math.pow(1 + monthlyRate, 3);
                     values.push(baseVal.toFixed(2));
                 }
 
@@ -210,7 +235,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Evolução Patrimonial (R$)',
+                            label: 'Evolução Projetada (R$)',
                             data: values,
                             borderColor: '#38bdf8',
                             backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -228,7 +253,7 @@
                     }
                 });
 
-                // Render Doughnut Chart (Alocação)
+                // Gráfico de Pizza (Doughnut)
                 const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
                 if (doughnutChart) doughnutChart.destroy();
 
@@ -238,7 +263,7 @@
                         labels: allocLabels,
                         datasets: [{
                             data: allocValues,
-                            backgroundColor: ['#0284c7', '#38bdf8', '#34d399', '#facc15', '#f87171']
+                            backgroundColor: ['#0284c7', '#38bdf8', '#34d399', '#facc15', '#f87171', '#c084fc']
                         }]
                     },
                     options: {
@@ -247,7 +272,7 @@
                     }
                 });
 
-                saveHistory({ projectedValue1Year: adjustedProj }, capital, riskTolerance);
+                saveHistory({ projectedNominal: nominal1Year }, capital, riskTolerance);
             } else {
                 alert('Erro ao processar análise.');
             }

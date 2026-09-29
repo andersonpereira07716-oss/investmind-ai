@@ -3,28 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - Robo-Advisor</title>
+    <title>InvestMind AI - Robo-Advisor Avançado</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 40px auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .container { max-width: 700px; margin: 20px auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         h1 { color: #38bdf8; text-align: center; font-size: 24px; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
         input, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 14px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
         button:hover { background: #0369a1; }
+        button.secondary { background: #334155; }
+        button.secondary:hover { background: #475569; }
         .result { margin-top: 25px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; display: none; }
         .result h3 { color: #38bdf8; margin-top: 0; }
         ul { padding-left: 20px; margin: 10px 0; }
         li { margin-bottom: 6px; color: #cbd5e1; }
         .highlight { color: #4ade80; font-weight: bold; }
+        .chart-container { position: relative; margin-top: 20px; height: 250px; width: 100%; }
+        .history-box { margin-top: 25px; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; display: none; }
+        .history-item { padding: 8px; border-bottom: 1px solid #334155; font-size: 13px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
+        .history-item span { color: #f8fafc; }
+        @media print {
+            body { background: white; color: black; }
+            .container { box-shadow: none; border: none; width: 100%; margin: 0; }
+            button, .form-group, .history-box { display: none; }
+            .result { display: block !important; border: none; background: white; color: black; }
+            .highlight { color: green; }
+            h1, h3 { color: black; }
+            li { color: black; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>InvestMind AI</h1>
-        <p class="subtitle">Seu Agente de Inteligência Financeira e Alocação de Portfólio</p>
+        <p class="subtitle">Plataforma Inteligente de Alocação e Projeção de Portfólio</p>
         
         <div class="form-group">
             <label>Capital Inicial (R$)</label>
@@ -37,23 +54,61 @@
         <div class="form-group">
             <label>Perfil de Risco</label>
             <select id="risk">
-                <option value="conservador">Conservador (Foco em Renda Fixa e Baixo Risco)</option>
-                <option value="moderado" selected>Moderado (Equilíbrio entre Renda Fixa e Variável)</option>
-                <option value="arrojado">Arrojado (Foco em Crescimento e Alta Exposição)</option>
+                <option value="conservador">Conservador (Foco em Renda Fixa)</option>
+                <option value="moderado" selected>Moderado (Equilíbrio Dinâmico)</option>
+                <option value="arrojado">Arrojado (Crescimento e Exposição Global)</option>
             </select>
         </div>
-        <button onclick="analyze()">Gerar Estratégia de Investimento</button>
+        <div class="btn-group">
+            <button onclick="analyze()">Gerar Análise</button>
+            <button class="secondary" onclick="window.print()">Exportar PDF</button>
+        </div>
 
         <div id="resultBox" class="result">
-            <h3>Plano de Alocação Recomendado</h3>
-            <p><strong>Instituição Sugerida:</strong> <span id="resInst" class="highlight"></span></p>
-            <p><strong>Alocação Estratégica:</strong></p>
+            <h3>Plano de Alocação Estratégico</h3>
+            <p><strong>Instituição Recomendada:</strong> <span id="resInst" class="highlight"></span></p>
+            <p><strong>Distribuição de Ativos:</strong></p>
             <ul id="resAlloc"></ul>
-            <p><strong>Projeção Estimada (1 Ano):</strong> <span id="resProj" class="highlight"></span></p>
+            <p><strong>Projeção (1 Ano):</strong> <span id="resProj" class="highlight"></span></p>
+            
+            <div class="chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+
+        <div id="historyBox" class="history-box">
+            <h4 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 14px;">Simulações Anteriores</h4>
+            <div id="historyList"></div>
         </div>
     </div>
 
     <script>
+        let myChart = null;
+
+        function saveHistory(data, capital, risk) {
+            let history = JSON.parse(localStorage.getItem('investmind_history') || '[]');
+            history.unshift({ date: new Date().toLocaleDateString(), capital, risk, projected: data.projectedValue1Year });
+            if (history.length > 5) history.pop();
+            localStorage.setItem('investmind_history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            let history = JSON.parse(localStorage.getItem('investmind_history') || '[]');
+            const box = document.getElementById('historyBox');
+            const list = document.getElementById('historyList');
+            if (history.length === 0) { box.style.display = 'none'; return; }
+            
+            list.innerHTML = '';
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `<span>${item.date} - R$ ${item.capital} (${item.risk})</span> <strong class="highlight">R$ ${item.projected}</strong>`;
+                list.appendChild(div);
+            });
+            box.style.display = 'block';
+        }
+
         async function analyze() {
             const capital = document.getElementById('capital').value;
             const monthlyContribution = document.getElementById('monthly').value;
@@ -79,10 +134,53 @@
                     ul.appendChild(li);
                 }
                 document.getElementById('resultBox').style.display = 'block';
+
+                // Render Chart
+                const ctx = document.getElementById('growthChart').getContext('2d');
+                if (myChart) myChart.destroy();
+                
+                let baseVal = Number(capital);
+                let monthly = Number(monthlyContribution);
+                let rate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
+                let labels = ['Início', 'Mês 3', 'Mês 6', 'Mês 9', 'Mês 12'];
+                let values = [baseVal];
+                
+                for(let i=1; i<=4; i++) {
+                    baseVal = (baseVal + monthly * 3) * Math.pow(1 + rate, 3);
+                    values.push(baseVal.toFixed(2));
+                }
+
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Evolução do Patrimônio (R$)',
+                            data: values,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#f8fafc' } } },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+
+                saveHistory(r, capital, riskTolerance);
             } else {
                 alert('Erro ao processar análise.');
             }
         }
+
+        window.onload = loadHistory;
     </script>
 </body>
 </html>

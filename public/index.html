@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - Master Elite Suite</title>
+    <title>InvestMind AI - Ultimate Wealth Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 15px; }
@@ -25,6 +25,8 @@
         ul { padding-left: 18px; margin: 8px 0; }
         li { margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
         .highlight { color: #4ade80; font-weight: bold; }
+        .fire-box { margin-top: 15px; background: #064e3b; border: 1px solid #059669; padding: 15px; border-radius: 8px; }
+        .fire-box h4 { margin: 0 0 5px 0; color: #34d399; font-size: 14px; }
         .chart-box { position: relative; margin-top: 15px; height: 220px; width: 100%; }
         .history-box { margin-top: 20px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937; display: none; }
         .history-item { padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
@@ -38,13 +40,15 @@
             .highlight { color: green; }
             h1, h3 { color: black; }
             li { color: black; }
+            .fire-box { background: #f0fdf4; border: 1px solid #bbf7d0; color: black; }
+            .fire-box h4 { color: #166534; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>InvestMind AI <span class="badge">MASTER ELITE</span></h1>
-        <p class="subtitle">Robo-Advisor Avançado com Multi-Bancos, 5 Perfis de Risco e Análise Tributária</p>
+        <h1>InvestMind AI <span class="badge">ULTIMATE WEALTH</span></h1>
+        <p class="subtitle">Robo-Advisor com Multi-Bancos, Perfis de Risco, Eficiência Tributária & Simulador FIRE</p>
         
         <div class="grid-2">
             <div class="form-group">
@@ -92,10 +96,10 @@
             <div class="form-group">
                 <label>Perfil de Risco Avançado</label>
                 <select id="risk">
-                    <option value="ultraconservador">Ultra-Conservador (100% Tesouro Selic / Pós)</option>
+                    <option value="ultraconservador">Ultra-Conservador (100% Tesouro Selic)</option>
                     <option value="conservador">Conservador (85% Renda Fixa / 15% FIIs)</option>
-                    <option value="moderado" selected>Moderado (60% Renda Fixa / 40% Ações & Multimercado)</option>
-                    <option value="arrojado">Arrojado (30% Renda Fixa / 70% Ações & Exterior)</option>
+                    <option value="moderado" selected>Moderado (60% Fixa / 40% Ações & Multimercado)</option>
+                    <option value="arrojado">Arrojado (30% Fixa / 70% Ações & Exterior)</option>
                     <option value="agressivo">Agressivo / Cripto (10% Fixa / 70% Ações/Global / 20% Alt-Risk)</option>
                 </select>
             </div>
@@ -116,28 +120,39 @@
                 <input type="number" id="goal" value="250000">
             </div>
             <div class="form-group">
-                <label>Inflação Estimada (% a.a.)</label>
-                <input type="number" id="inflation" value="4.5">
+                <label>Custo de Vida Desejado / Mês (R$)</label>
+                <input type="number" id="desiredIncome" value="5000">
             </div>
         </div>
 
+        <div class="form-group">
+            <label>Inflação Estimada (% a.a.)</label>
+            <input type="number" id="inflation" value="4.5">
+        </div>
+
         <div class="btn-group">
-            <button onclick="analyze()">Executar Análise Master</button>
+            <button onclick="analyze()">Executar Análise Ultimate</button>
             <button class="secondary" onclick="window.print()">Exportar PDF</button>
         </div>
 
         <div id="resultBox" class="result">
-            <h3>Relatório Estratégico Master Elite</h3>
+            <h3>Relatório Estratégico Ultimate Wealth</h3>
             <p><strong>Instituição Selecionada:</strong> <span id="resBankName" class="highlight"></span></p>
             <p><strong>Perfil de Risco Aplicado:</strong> <span id="resRiskName" class="highlight"></span></p>
             <p><strong>Alocação Estratégica Otimizada:</strong></p>
             <ul id="resAlloc"></ul>
             <p><strong>Projeção Nominal (1 Ano):</strong> <span id="resProjNom" class="highlight"></span></p>
             <p><strong>Projeção Real (Pós-Inflação):</strong> <span id="resProjReal" class="highlight"></span></p>
-            <p><strong>Estimativa Líquida Pós-IR (Regressivo 15%):</strong> <span id="resNetIR" class="highlight"></span></p>
-            <p><strong>Estimativa de Renda Passiva Mensal:</strong> <span id="resPassiveIncome" class="highlight"></span></p>
-            <p><strong>Tempo Estimado para Atingir a Meta:</strong> <span id="resGoalTime" class="highlight"></span></p>
+            <p><strong>Estimativa Líquida Pós-IR (Regressivo):</strong> <span id="resNetIR" class="highlight"></span></p>
+            <p><strong>Renda Passiva Mensal Estimada:</strong> <span id="resPassiveIncome" class="highlight"></span></p>
+            <p><strong>Prazo para Atingir a Meta de R$ <span id="labelGoalVal"></span>:</strong> <span id="resGoalTime" class="highlight"></span></p>
             
+            <div class="fire-box">
+                <h4>Simulador FIRE (Independência Financeira)</h4>
+                <p style="font-size: 13px; margin: 0 0 5px 0;">Patrimônio necessário para cobrir R$ <span id="fireTargetIncome"></span>/mês para sempre (Regra dos 4%): <strong id="fireTargetPatrimony" style="color: #fff;"></strong></p>
+                <p style="font-size: 13px; margin: 0;">Tempo estimado para alcançar a Independência Financeira FIRE: <strong id="fireTime" style="color: #fff;"></strong></p>
+            </div>
+
             <div style="margin-top: 15px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;">
                 <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px;">Diretriz de Eficiência Tributária & Institucional</h4>
                 <p style="font-size: 13px; margin: 0; color: #94a3b8;" id="bankAdvice"></p>
@@ -153,7 +168,7 @@
 
         <div id="historyBox" class="history-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Histórico de Simulações Master</h4>
+                <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Histórico de Simulações Ultimate</h4>
                 <button class="danger" onclick="clearHistory()">Limpar</button>
             </div>
             <div id="historyList"></div>
@@ -186,15 +201,15 @@
         };
 
         function saveHistory(data, capital, risk) {
-            let history = JSON.parse(localStorage.getItem('investmind_master_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
             history.unshift({ date: new Date().toLocaleDateString(), capital, risk: risk.toUpperCase(), projected: data.projectedNominal });
             if (history.length > 5) history.pop();
-            localStorage.setItem('investmind_master_history', JSON.stringify(history));
+            localStorage.setItem('investmind_ultimate_history', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('investmind_master_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
             const box = document.getElementById('historyBox');
             const list = document.getElementById('historyList');
             if (history.length === 0) { box.style.display = 'none'; return; }
@@ -210,7 +225,7 @@
         }
 
         function clearHistory() {
-            localStorage.removeItem('investmind_master_history');
+            localStorage.removeItem('investmind_ultimate_history');
             loadHistory();
         }
 
@@ -220,12 +235,15 @@
             const riskTolerance = document.getElementById('risk').value;
             const globalExp = Number(document.getElementById('globalExposure').value);
             const goal = Number(document.getElementById('goal').value);
+            const desiredIncome = Number(document.getElementById('desiredIncome').value);
             const inflationRate = Number(document.getElementById('inflation').value) / 100;
             const bankKey = document.getElementById('bank').value;
 
             document.getElementById('resBankName').innerText = bankDetails[bankKey].name;
             document.getElementById('resRiskName').innerText = riskLabels[riskTolerance];
             document.getElementById('bankAdvice').innerText = bankDetails[bankKey].advice;
+            document.getElementById('labelGoalVal').innerText = goal.toLocaleString('pt-BR');
+            document.getElementById('fireTargetIncome').innerText = desiredIncome.toLocaleString('pt-BR');
 
             const res = await fetch('/api/analyze', {
                 method: 'POST',
@@ -240,14 +258,15 @@
                 let monthlyRate = riskTolerance === 'ultraconservador' ? 0.008 : riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : riskTolerance === 'arrojado' ? 0.013 : 0.015;
                 let nominal1Year = Number(r.projectedValue1Year);
                 let real1Year = (nominal1Year / Math.pow(1 + inflationRate, 1)).toFixed(2);
-                let netIR1Year = (nominal1Year * 0.92).toFixed(2); // Desconto simulado médio de IR pós-otimização
+                let netIR1Year = (nominal1Year * 0.92).toFixed(2);
                 let estimatedPassiveIncome = (nominal1Year * 0.009).toFixed(2);
 
-                document.getElementById('resProjNom').innerText = 'R$ ' + nominal1Year;
-                document.getElementById('resProjReal').innerText = 'R$ ' + real1Year + ' (Poder de compra corrigido)';
-                document.getElementById('resNetIR').innerText = 'R$ ' + netIR1Year + ' (Alíquota eficiente aplicada)';
-                document.getElementById('resPassiveIncome').innerText = 'R$ ' + estimatedPassiveIncome + ' / mês';
+                document.getElementById('resProjNom').innerText = 'R$ ' + nominal1Year.toLocaleString('pt-BR');
+                document.getElementById('resProjReal').innerText = 'R$ ' + Number(real1Year).toLocaleString('pt-BR') + ' (Poder de compra corrigido)';
+                document.getElementById('resNetIR').innerText = 'R$ ' + Number(netIR1Year).toLocaleString('pt-BR') + ' (Alíquota eficiente aplicada)';
+                document.getElementById('resPassiveIncome').innerText = 'R$ ' + Number(estimatedPassiveIncome).toLocaleString('pt-BR') + ' / mês';
 
+                // Meta de Patrimônio
                 let currentVal = capital;
                 let months = 0;
                 while(currentVal < goal && months < 360) {
@@ -256,6 +275,19 @@
                 }
                 let yearsTime = (months / 12).toFixed(1);
                 document.getElementById('resGoalTime').innerText = months >= 360 ? 'Mais de 30 anos' : `${months} meses (~${yearsTime} anos)`;
+
+                // Simulador FIRE (Patrimônio necessário = Renda Anual / 4% -> Renda Mensal * 12 * 25)
+                let firePatrimonyTarget = desiredIncome * 12 * 25;
+                document.getElementById('fireTargetPatrimony').innerText = 'R$ ' + firePatrimonyTarget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                let fireVal = capital;
+                let fireMonths = 0;
+                while(fireVal < firePatrimonyTarget && fireMonths < 600) {
+                    fireVal = (fireVal + monthlyContribution) * (1 + monthlyRate);
+                    fireMonths++;
+                }
+                let fireYears = (fireMonths / 12).toFixed(1);
+                document.getElementById('fireTime').innerText = fireMonths >= 600 ? 'Mais de 50 anos' : `${fireMonths} meses (~${fireYears} anos)`;
 
                 const ul = document.getElementById('resAlloc');
                 ul.innerHTML = '';
@@ -287,7 +319,7 @@
                 let values = [baseVal];
                 for(let i=1; i<=4; i++) {
                     baseVal = (baseVal + monthlyContribution * 3) * Math.pow(1 + monthlyRate, 3);
-                    values.push(baseVal.toFixed(2));
+                    values.push(Number(baseVal.toFixed(2)));
                 }
 
                 lineChart = new Chart(ctxLine, {
@@ -295,7 +327,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Evolução Master (R$)',
+                            label: 'Evolução Ultimate (R$)',
                             data: values,
                             borderColor: '#38bdf8',
                             backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -331,7 +363,7 @@
                     }
                 });
 
-                saveHistory({ projectedNominal: nominal1Year }, capital, riskTolerance);
+                saveHistory({ projectedNominal: nominal1Year.toLocaleString('pt-BR') }, capital, riskTolerance);
             } else {
                 alert('Erro ao processar análise.');
             }

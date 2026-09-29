@@ -10,6 +10,7 @@ import {
 export default function InvestMindEliteUI() {
   const [capital, setCapital] = useState(30000);
   const [aporte, setAporte] = useState(1500);
+  const [aporteExtra, setAporteExtra] = useState(5000);
   const [perfil, setPerfil] = useState('Moderado');
   const [exposicao, setExposicao] = useState(15);
   const [meta, setMeta] = useState(250000);
@@ -19,9 +20,9 @@ export default function InvestMindEliteUI() {
   const [resultado, setResultado] = useState<any>(null);
   const [notificacaoEnviada, setNotificacaoEnviada] = useState(false);
 
-  const executarAnaliseElite = () => {
+  const executarAnaliseAvancada = () => {
     const estado = {
-      capitalInicial: capital,
+      capitalInicial: capital + aporteExtra,
       aporteMensal: aporte,
       instituicao: instituicao,
       objetivo: "Geração de Renda",
@@ -34,36 +35,27 @@ export default function InvestMindEliteUI() {
 
     const monteCarlo = runMonteCarloSimulation(estado, 20);
     const alocacao = getAssetAllocation(perfil, exposicao);
-    const metasFire = calcularMetasFIRE(custoVida, capital);
-    const carteiraAtual = { rendaFixaLocal: capital * 0.6, acoesLocais: capital * 0.25, acoesGlobaisDolar: capital * 0.15 };
-    const rebalanceamento = calcularAporteRebalanceamento(carteiraAtual, alocacao, aporte);
-    const alertas = verificarAlertasDesvio(carteiraAtual, alocacao);
+    const metasFire = calcularMetasFIRE(custoVida, capital + aporteExtra);
+    
+    // 1. Cálculo Estimado de IR sobre Ganho de Capital em Renda Variável (Ex: 15% sobre lucro projetado)
+    const ganhoBrutoEstimado = monteCarlo.mediano - (capital + aporteExtra);
+    const impostoVariavelEstimado = ganhoBrutoEstimado > 0 ? ganhoBrutoEstimado * 0.15 : 0;
 
-    // 1. Otimizador de Alocação por Classe de Ativos
-    const otimizacaoClasses = {
-      rendaFixa: capital * (alocacao.rendaFixa || 0.5),
-      acoesBrasil: capital * (alocacao.acoesBrasil || 0.3),
-      exterior: capital * (alocacao.exterior || 0.2)
-    };
+    // 2. Simulação do Impacto do Aporte Extra
+    const patrimonioSemExtra = monteCarlo.mediano * 0.90; // Comparativo estimado sem o aporte extra
 
-    // 2. Comparador de Taxas e Custódia Institucional
-    const taxaCustodiaAnual = instituicao.includes('Banco do Brasil') || instituicao.includes('Caixa') ? 0.004 : 0.0;
-    const impactoTaxa20Anos = capital * taxaCustodiaAnual * 20;
-
-    // 3. Simulador de Rentabilidade Líquida Ajustada (Descontando imposto e taxas)
-    const impostoRendaEstimado = (monteCarlo.mediano - capital) * 0.15;
-    const liquidoFinalAjustado = monteCarlo.mediano - impostoRendaEstimado - impactoTaxa20Anos;
+    // 3. Alertas de Desvio de Rebalanceamento
+    const carteiraAtual = { rendaFixaLocal: (capital + aporteExtra) * 0.6, acoesLocais: (capital + aporteExtra) * 0.25, acoesGlobaisDolar: (capital + aporteExtra) * 0.15 };
+    const alertasDesvio = verificarAlertasDesvio(carteiraAtual, alocacao);
 
     setResultado({ 
       monteCarlo, 
       alocacao, 
       metasFire, 
-      rebalanceamento, 
-      alertas, 
-      estado, 
-      otimizacaoClasses,
-      taxaCustodiaAnual,
-      liquidoFinalAjustado 
+      impostoVariavelEstimado, 
+      patrimonioSemExtra, 
+      alertasDesvio, 
+      estado 
     });
     setNotificacaoEnviada(false);
   };
@@ -72,18 +64,15 @@ export default function InvestMindEliteUI() {
     if (!resultado) return;
     const conteudoHtml = `
       <html>
-        <head><title>InvestMind AI - Relatório Integrado Elite</title></head>
+        <head><title>InvestMind AI - Relatório Avançado</title></head>
         <body style="font-family: Arial; padding: 20px; background: #0f172a; color: #f8fafc;">
-          <h1>InvestMind AI - Relatório Consolidado</h1>
+          <h1>InvestMind AI - Relatório de Inteligência Patrimonial</h1>
           <p><strong>Instituição:</strong> ${resultado.estado.instituicao} | <strong>Perfil:</strong> ${resultado.estado.perfilRisco}</p>
           <hr style="border-color: #334155;"/>
-          <h3>Otimização de Portfólio & Líquido Ajustado</h3>
-          <p>Patrimônio Líquido Final (P50): R$ ${resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p>Taxa de Custódia Institucional: ${(resultado.taxaCustodiaAnual * 100).toFixed(2)}% ao ano</p>
-          <h3>Alocação Ideal por Classe</h3>
-          <p>Renda Fixa: R$ ${resultado.otimizacaoClasses.rendaFixa.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p>Ações Brasil: R$ ${resultado.otimizacaoClasses.acoesBrasil.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-          <p>Ativos Internacionais / Exterior: R$ ${resultado.otimizacaoClasses.exterior.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <h3>Projeção & Tributação</h3>
+          <p>Patrimônio Projetado (Mediano 20 anos): R$ ${resultado.monteCarlo.mediano.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <p>Imposto de Renda Estimado (Ganho de Capital): R$ ${resultado.impostoVariavelEstimado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+          <p>Impacto do Aporte Extra: R$ ${(resultado.monteCarlo.mediano - resultado.patrimonioSemExtra).toLocaleString('pt-BR', {maximumFractionDigits: 0})} a mais no longo prazo.</p>
         </body>
       </html>
     `;
@@ -97,7 +86,7 @@ export default function InvestMindEliteUI() {
 
   const enviarRelatorioWhatsApp = () => {
     if (!resultado) return;
-    const texto = encodeURIComponent(`*InvestMind AI - Relatório Consolidado*\nLíquido Ajustado: R$ ${resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}\nInstituição: ${instituicao}`);
+    const texto = encodeURIComponent(`*InvestMind AI - Relatório Avançado*\nPatrimônio Projetado: R$ ${resultado.monteCarlo.mediano.toLocaleString('pt-BR', {maximumFractionDigits: 0})}\nAnos para FIRE: ${resultado.metasFire.anosNecessarios.toFixed(1)} anos`);
     window.open(`https://api.whatsapp.com/send?phone=${telefone}&text=${texto}`, '_blank');
     setNotificacaoEnviada(true);
   };
@@ -106,8 +95,8 @@ export default function InvestMindEliteUI() {
     <div className="p-6 bg-slate-950 text-slate-100 rounded-2xl max-w-4xl mx-auto space-y-6 shadow-2xl border border-slate-900">
       <div className="border-b border-slate-800 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Elite 3-em-1 Suite</span></h2>
-          <p className="text-sm text-slate-400">Otimizador de Classes, Comparador Institucional & Rentabilidade Líquida</p>
+          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Advanced Suite</span></h2>
+          <p className="text-sm text-slate-400">Com Imposto Inteligente, Aporte Extra & Alertas de Rebalanceamento</p>
         </div>
       </div>
 
@@ -119,6 +108,10 @@ export default function InvestMindEliteUI() {
         <div>
           <label className="text-xs text-slate-400">Aporte Mensal (R$)</label>
           <input type="number" value={aporte} onChange={e => setAporte(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
+        </div>
+        <div>
+          <label className="text-xs text-slate-400">Aporte Extra Único (R$)</label>
+          <input type="number" value={aporteExtra} onChange={e => setAporteExtra(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
         </div>
         <div>
           <label className="text-xs text-slate-400">Instituição Financeira</label>
@@ -140,18 +133,14 @@ export default function InvestMindEliteUI() {
           </select>
         </div>
         <div>
-          <label className="text-xs text-slate-400">Meta de Patrimônio (R$)</label>
-          <input type="number" value={meta} onChange={e => setMeta(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
-        </div>
-        <div>
           <label className="text-xs text-slate-400">Custo de Vida / Mês (R$)</label>
           <input type="number" value={custoVida} onChange={e => setCustoVida(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
         </div>
       </div>
 
       <div className="flex gap-3">
-        <button onClick={executarAnaliseElite} className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-xl transition shadow-lg shadow-cyan-900/30">
-          Executar Análise Consolidada 3-em-1
+        <button onClick={executarAnaliseAvancada} className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-xl transition shadow-lg shadow-cyan-900/30">
+          Executar Análise Advanced Suite
         </button>
         {resultado && (
           <button onClick={exportarPDF} className="px-5 py-3 bg-slate-800 hover:bg-slate-700 font-bold rounded-xl transition border border-slate-700 text-cyan-300">
@@ -162,28 +151,32 @@ export default function InvestMindEliteUI() {
 
       {resultado && (
         <div className="space-y-4 bg-slate-900/90 p-5 rounded-xl border border-slate-800 animate-fadeIn">
-          <h3 className="text-lg font-semibold text-cyan-300">📊 Resultados dos 3 Módulos Integrados</h3>
+          <h3 className="text-lg font-semibold text-cyan-300">🚀 Painel de Inteligência Avançada</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-              <h4 className="font-bold text-slate-300 mb-1">🎯 1 & 3. Otimização & Líquido Final</h4>
-              <p className="text-emerald-400 font-bold">Líquido Ajustado (20 anos): R$ {resultado.liquidoFinalAjustado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-xs text-slate-400">Renda Fixa: R$ {resultado.otimizacaoClasses.rendaFixa.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-xs text-slate-400">Ações BR: R$ {resultado.otimizacaoClasses.acoesBrasil.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
-              <p className="text-xs text-slate-400">Exterior: R$ {resultado.otimizacaoClasses.exterior.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <h4 className="font-bold text-slate-300 mb-1">💡 Impacto do Aporte Extra & Tributação</h4>
+              <p className="text-emerald-400">Ganho Adicional pelo Aporte Extra: R$ {(resultado.monteCarlo.mediano - resultado.patrimonioSemExtra).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-amber-400">Projeção de IR sobre Ganho (15%): R$ {resultado.impostoVariavelEstimado.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-xs text-slate-400 pt-1">Estimativa calculada sobre o lucro bruto projetado em 20 anos.</p>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-              <h4 className="font-bold text-slate-300 mb-1">🏦 2. Comparativo Institucional</h4>
-              <p className="text-slate-300">Instituição: <span className="text-cyan-400 font-bold">{instituicao}</span></p>
-              <p className="text-slate-300">Taxa de Custódia: <span className="font-mono text-amber-400">{(resultado.taxaCustodiaAnual * 100).toFixed(2)}% a.a.</span></p>
-              <p className="text-xs text-slate-400 pt-1">Simulação otimizada com motores de rebalanceamento automático e alertas de desvio ativados.</p>
+              <h4 className="font-bold text-slate-300 mb-1">⚖️ Alertas de Rebalanceamento</h4>
+              {resultado.alertasDesvio && resultado.alertasDesvio.length > 0 ? (
+                resultado.alertasDesvio.map((alerta: string, idx: number) => (
+                  <p key={idx} className="text-xs text-cyan-300">⚠️ {alerta}</p>
+                ))
+              ) : (
+                <p className="text-xs text-emerald-400">✅ Sua carteira está alinhada com o perfil ótimo.</p>
+              )}
+              <p className="text-xs text-slate-400 pt-2">Metas FIRE: Aprox. {resultado.metasFire.anosNecessarios.toFixed(1)} anos restantes.</p>
             </div>
           </div>
 
           <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="w-full">
-              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Enviar Relatório Consolidado via WhatsApp</h4>
+              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Enviar Relatório via WhatsApp</h4>
               <input 
                 type="text" 
                 placeholder="Seu WhatsApp (ex: 5583999999999)" 

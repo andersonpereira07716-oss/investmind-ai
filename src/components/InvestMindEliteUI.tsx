@@ -79,7 +79,7 @@ export default function InvestMindEliteUI() {
       });
       setCarregando(false);
       setNotificacaoEnviada(false);
-    }, 400); // Pequeno delay simulando processamento quântico de IA
+    }, 400);
   };
 
   const exportarPDF = () => {

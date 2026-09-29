@@ -3,52 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - Ultimate Wealth Suite</title>
+    <title>InvestMind AI - Nota 10 Elite Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 15px; }
-        .container { max-width: 750px; margin: 10px auto; background: #111827; padding: 25px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid #1f2937; }
-        h1 { color: #38bdf8; text-align: center; font-size: 22px; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+        :root {
+            --bg: #090d16;
+            --container-bg: #111827;
+            --text: #f8fafc;
+            --subtext: #94a3b8;
+            --border: #1f2937;
+            --input-bg: #0f172a;
+            --input-border: #334155;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+        }
+        body.light-theme {
+            --bg: #f1f5f9;
+            --container-bg: #ffffff;
+            --text: #0f172a;
+            --subtext: #64748b;
+            --border: #e2e8f0;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 780px; margin: 10px auto; background: var(--container-bg); padding: 25px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        h1 { color: #38bdf8; font-size: 22px; margin: 0; }
+        p.subtitle { text-align: center; color: var(--subtext); font-size: 13px; margin-bottom: 20px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 13px; color: #cbd5e1; }
-        input, select { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 15px; box-sizing: border-box; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 13px; color: var(--subtext); }
+        input, select { width: 100%; padding: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text); font-size: 15px; box-sizing: border-box; }
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        button { flex: 1; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #0369a1; }
-        button.secondary { background: #334155; }
+        button { flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: var(--primary-hover); }
+        button.secondary { background: #334155; color: #fff; }
         button.secondary:hover { background: #475569; }
-        button.danger { background: #7f1d1d; font-size: 12px; padding: 6px; flex: unset; }
-        .result { margin-top: 20px; background: #0f172a; padding: 18px; border-radius: 10px; border: 1px solid #1e293b; display: none; }
-        .result h3 { color: #38bdf8; margin-top: 0; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 8px; }
+        button.theme-toggle { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; font-size: 12px; border-radius: 6px; flex: unset; }
+        button.theme-toggle:hover { background: var(--primary); color: #fff; }
+        button.danger { background: #7f1d1d; color: white; font-size: 12px; padding: 6px; flex: unset; }
+        .result { margin-top: 20px; background: var(--input-bg); padding: 18px; border-radius: 10px; border: 1px solid var(--border); display: none; }
+        .result h3 { color: #38bdf8; margin-top: 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         ul { padding-left: 18px; margin: 8px 0; }
-        li { margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
+        li { margin-bottom: 5px; color: var(--text); font-size: 14px; }
         .highlight { color: #4ade80; font-weight: bold; }
-        .fire-box { margin-top: 15px; background: #064e3b; border: 1px solid #059669; padding: 15px; border-radius: 8px; }
+        body.light-theme .highlight { color: #16a34a; }
+        .fire-box { margin-top: 15px; background: rgba(6, 78, 59, 0.2); border: 1px solid #059669; padding: 15px; border-radius: 8px; }
         .fire-box h4 { margin: 0 0 5px 0; color: #34d399; font-size: 14px; }
+        .rebalance-box { margin-top: 15px; background: rgba(3, 105, 161, 0.15); border: 1px solid #0284c7; padding: 15px; border-radius: 8px; }
+        .rebalance-box h4 { margin: 0 0 8px 0; color: #38bdf8; font-size: 14px; }
         .chart-box { position: relative; margin-top: 15px; height: 220px; width: 100%; }
-        .history-box { margin-top: 20px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937; display: none; }
-        .history-item { padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
-        .history-item span { color: #f8fafc; }
-        .badge { background: #0369a1; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .history-box { margin-top: 20px; background: var(--container-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: none; }
+        .history-item { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--subtext); display: flex; justify-content: space-between; align-items: center; }
+        .history-item span { color: var(--text); }
+        .badge { background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
         @media print {
-            body { background: white; color: black; }
-            .container { box-shadow: none; border: none; width: 100%; margin: 0; }
+            body { background: white !important; color: black !important; }
+            .container { box-shadow: none; border: none; width: 100%; margin: 0; background: white !important; color: black !important; }
             button, .form-group, .history-box { display: none; }
-            .result { display: block !important; border: none; background: white; color: black; }
-            .highlight { color: green; }
-            h1, h3 { color: black; }
-            li { color: black; }
-            .fire-box { background: #f0fdf4; border: 1px solid #bbf7d0; color: black; }
-            .fire-box h4 { color: #166534; }
+            .result { display: block !important; border: none; background: white !important; color: black !important; }
+            .highlight { color: green !important; }
+            h1, h3 { color: black !important; }
+            li { color: black !important; }
+            .fire-box, .rebalance-box { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; color: black !important; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>InvestMind AI <span class="badge">ULTIMATE WEALTH</span></h1>
-        <p class="subtitle">Robo-Advisor com Multi-Bancos, Perfis de Risco, Eficiência Tributária & Simulador FIRE</p>
+        <div class="header-top">
+            <h1>InvestMind AI <span class="badge">NOTA 10 ELITE</span></h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Alternar Tema</button>
+        </div>
+        <p class="subtitle">Robo-Advisor Definitivo com Multi-Bancos, 5 Perfis, FIRE, Rebalanceamento & Eficiência Tributária</p>
         
         <div class="grid-2">
             <div class="form-group">
@@ -131,12 +161,12 @@
         </div>
 
         <div class="btn-group">
-            <button onclick="analyze()">Executar Análise Ultimate</button>
+            <button onclick="analyze()">Executar Análise Nota 10</button>
             <button class="secondary" onclick="window.print()">Exportar PDF</button>
         </div>
 
         <div id="resultBox" class="result">
-            <h3>Relatório Estratégico Ultimate Wealth</h3>
+            <h3>Relatório Estratégico Nota 10 Elite</h3>
             <p><strong>Instituição Selecionada:</strong> <span id="resBankName" class="highlight"></span></p>
             <p><strong>Perfil de Risco Aplicado:</strong> <span id="resRiskName" class="highlight"></span></p>
             <p><strong>Alocação Estratégica Otimizada:</strong></p>
@@ -149,13 +179,18 @@
             
             <div class="fire-box">
                 <h4>Simulador FIRE (Independência Financeira)</h4>
-                <p style="font-size: 13px; margin: 0 0 5px 0;">Patrimônio necessário para cobrir R$ <span id="fireTargetIncome"></span>/mês para sempre (Regra dos 4%): <strong id="fireTargetPatrimony" style="color: #fff;"></strong></p>
-                <p style="font-size: 13px; margin: 0;">Tempo estimado para alcançar a Independência Financeira FIRE: <strong id="fireTime" style="color: #fff;"></strong></p>
+                <p style="font-size: 13px; margin: 0 0 5px 0;">Patrimônio necessário para cobrir R$ <span id="fireTargetIncome"></span>/mês (Regra dos 4%): <strong id="fireTargetPatrimony" style="color: var(--text);"></strong></p>
+                <p style="font-size: 13px; margin: 0;">Tempo estimado para alcançar a Independência Financeira: <strong id="fireTime" style="color: var(--text);"></strong></p>
             </div>
 
-            <div style="margin-top: 15px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;">
+            <div class="rebalance-box">
+                <h4>Sugestão de Ativos Setoriais Recomendados</h4>
+                <p style="font-size: 13px; margin: 0 0 6px 0; color: var(--subtext);" id="assetSuggestions"></p>
+            </div>
+
+            <div style="margin-top: 15px; background: var(--container-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                 <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px;">Diretriz de Eficiência Tributária & Institucional</h4>
-                <p style="font-size: 13px; margin: 0; color: #94a3b8;" id="bankAdvice"></p>
+                <p style="font-size: 13px; margin: 0; color: var(--subtext);" id="bankAdvice"></p>
             </div>
 
             <div class="chart-box">
@@ -168,7 +203,7 @@
 
         <div id="historyBox" class="history-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Histórico de Simulações Ultimate</h4>
+                <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Histórico de Simulações Nota 10</h4>
                 <button class="danger" onclick="clearHistory()">Limpar</button>
             </div>
             <div id="historyList"></div>
@@ -179,17 +214,21 @@
         let lineChart = null;
         let doughnutChart = null;
 
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
         const bankDetails = {
-            bb: { name: "Banco do Brasil (BB)", advice: "Recomenda-se alocação em LCI/LCA isentas e ações BBAS3 para otimização do Imposto de Renda." },
-            caixa: { name: "Caixa Econômica Federal", advice: "Foco em caderneta e LCIs habitacionais para proteção total de capital com isenção fiscal." },
-            bnb: { name: "Banco do Nordeste (BNB)", advice: "Aproveite fundos regionais estruturados com incentivos de desenvolvimento regional." },
-            basa: { name: "Banco da Amazônia (BASA)", advice: "Excelente para fundos constitucionais com foco em sustentabilidade e agronegócio." },
-            bndes: { name: "BNDES", advice: "Investimentos institucionais em debêntures de infraestrutura de longo prazo." },
-            nubank: { name: "Nubank", advice: "Utilize Caixinhas RDB com planejamento de resgate acima de 720 dias para menor alíquota de IR (15%)." },
-            xp: { name: "XP Investimentos", advice: "Acesse assessoria especializada para montagem de carteiras diversificadas em COE e Fundos Exclusivos." },
-            btg: { name: "BTG Pactual", advice: "Foco em private banking e fundos multimercado com alta eficiência fiscal." },
-            inter: { name: "Banco Inter", advice: "Concentre CDBs e portfólio internacional pelo Super App com zeragem de corretagem." },
-            avenue: { name: "Avenue Securities", advice: "Exposição direta a ativos globais em dólar com apuração de ganho de capital internacional." }
+            bb: { name: "Banco do Brasil (BB)", advice: "Recomenda-se alocação em LCI/LCA isentas e ações BBAS3 para otimização do Imposto de Renda.", assets: "Tesouro IPCA+, FIIs de Papel (KNCR11), Ações de Bancos e Elétricas (BBAS3, TAEE11)." },
+            caixa: { name: "Caixa Econômica Federal", advice: "Foco em caderneta e LCIs habitacionais para proteção total de capital com isenção fiscal.", assets: "LCI Habitação, Tesouro Selic e FIIs logísticos de grande porte." },
+            bnb: { name: "Banco do Nordeste (BNB)", advice: "Aproveite fundos regionais estruturados com incentivos de desenvolvimento regional.", assets: "CDBs regionais, Fundos de Infraestrutura e Tesouro Direto." },
+            basa: { name: "Banco da Amazônia (BASA)", advice: "Excelente para fundos constitucionais com foco em sustentabilidade e agronegócio.", assets: "Letras de Crédito do Agronegócio (LCA) e Fundos ESG." },
+            bndes: { name: "BNDES", advice: "Investimentos institucionais em debêntures de infraestrutura de longo prazo.", assets: "Debêntures incentivadas livres de IR e Tesouro Prefixado." },
+            nubank: { name: "Nubank", advice: "Utilize Caixinhas RDB com planejamento de resgate acima de 720 dias para menor alíquota de IR (15%).", assets: "RDB Imediato, Caixinha Reserva de Emergência e Bolsas Internacionais via BDRs." },
+            xp: { name: "XP Investimentos", advice: "Acesse assessoria especializada para montagem de carteiras diversificadas em COE e Fundos Exclusivos.", assets: "COE de Proteção de Capital, FIIs de Tijolo e Ações de Crescimento." },
+            btg: { name: "BTG Pactual", advice: "Foco em private banking e fundos multimercado com alta eficiência fiscal.", assets: "Fundos Multimercado Global, RF IPCA+ de emissão bancária e Ações Blue Chips." },
+            inter: { name: "Banco Inter", advice: "Concentre CDBs e portfólio internacional pelo Super App com zeragem de corretagem.", assets: "CDB Inter Liquidez Diária, Ações Globais e ETFs S&P 500 (IVVB11)." },
+            avenue: { name: "Avenue Securities", advice: "Exposição direta a ativos globais em dólar com apuração de ganho de capital internacional.", assets: "ETFs S&P 500 (VOO), REITs imobiliários americanos e Ações Tech (AAPL, MSFT)." }
         };
 
         const riskLabels = {
@@ -201,15 +240,15 @@
         };
 
         function saveHistory(data, capital, risk) {
-            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_nota10_history') || '[]');
             history.unshift({ date: new Date().toLocaleDateString(), capital, risk: risk.toUpperCase(), projected: data.projectedNominal });
             if (history.length > 5) history.pop();
-            localStorage.setItem('investmind_ultimate_history', JSON.stringify(history));
+            localStorage.setItem('investmind_nota10_history', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('investmind_ultimate_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_nota10_history') || '[]');
             const box = document.getElementById('historyBox');
             const list = document.getElementById('historyList');
             if (history.length === 0) { box.style.display = 'none'; return; }
@@ -225,7 +264,7 @@
         }
 
         function clearHistory() {
-            localStorage.removeItem('investmind_ultimate_history');
+            localStorage.removeItem('investmind_nota10_history');
             loadHistory();
         }
 
@@ -242,6 +281,7 @@
             document.getElementById('resBankName').innerText = bankDetails[bankKey].name;
             document.getElementById('resRiskName').innerText = riskLabels[riskTolerance];
             document.getElementById('bankAdvice').innerText = bankDetails[bankKey].advice;
+            document.getElementById('assetSuggestions').innerText = bankDetails[bankKey].assets;
             document.getElementById('labelGoalVal').innerText = goal.toLocaleString('pt-BR');
             document.getElementById('fireTargetIncome').innerText = desiredIncome.toLocaleString('pt-BR');
 
@@ -266,7 +306,6 @@
                 document.getElementById('resNetIR').innerText = 'R$ ' + Number(netIR1Year).toLocaleString('pt-BR') + ' (Alíquota eficiente aplicada)';
                 document.getElementById('resPassiveIncome').innerText = 'R$ ' + Number(estimatedPassiveIncome).toLocaleString('pt-BR') + ' / mês';
 
-                // Meta de Patrimônio
                 let currentVal = capital;
                 let months = 0;
                 while(currentVal < goal && months < 360) {
@@ -276,7 +315,6 @@
                 let yearsTime = (months / 12).toFixed(1);
                 document.getElementById('resGoalTime').innerText = months >= 360 ? 'Mais de 30 anos' : `${months} meses (~${yearsTime} anos)`;
 
-                // Simulador FIRE (Patrimônio necessário = Renda Anual / 4% -> Renda Mensal * 12 * 25)
                 let firePatrimonyTarget = desiredIncome * 12 * 25;
                 document.getElementById('fireTargetPatrimony').innerText = 'R$ ' + firePatrimonyTarget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
@@ -327,7 +365,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Evolução Ultimate (R$)',
+                            label: 'Evolução Nota 10 (R$)',
                             data: values,
                             borderColor: '#38bdf8',
                             backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -337,10 +375,10 @@
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { labels: { color: '#f8fafc', font: { size: 11 } } } },
+                        plugins: { legend: { labels: { color: document.body.classList.contains('light-theme') ? '#0f172a' : '#f8fafc', font: { size: 11 } } } },
                         scales: {
-                            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
-                            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+                            x: { ticks: { color: document.body.classList.contains('light-theme') ? '#64748b' : '#94a3b8', font: { size: 10 } }, grid: { color: document.body.classList.contains('light-theme') ? '#e2e8f0' : '#1e293b' } },
+                            y: { ticks: { color: document.body.classList.contains('light-theme') ? '#64748b' : '#94a3b8', font: { size: 10 } }, grid: { color: document.body.classList.contains('light-theme') ? '#e2e8f0' : '#1e293b' } }
                         }
                     }
                 });
@@ -359,7 +397,7 @@
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc', font: { size: 11 } } } }
+                        plugins: { legend: { position: 'bottom', labels: { color: document.body.classList.contains('light-theme') ? '#0f172a' : '#f8fafc', font: { size: 11 } } } }
                     }
                 });
 

@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestMind AI - Robo-Advisor Avançado</title>
+    <title>InvestMind AI - Robo-Advisor Master Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-        .container { max-width: 700px; margin: 20px auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        h1 { color: #38bdf8; text-align: center; font-size: 24px; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 16px; box-sizing: border-box; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        button { flex: 1; padding: 14px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 15px; }
+        .container { max-width: 750px; margin: 10px auto; background: #111827; padding: 25px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid #1f2937; }
+        h1 { color: #38bdf8; text-align: center; font-size: 22px; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 13px; color: #cbd5e1; }
+        input, select { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 15px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { flex: 1; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
         button:hover { background: #0369a1; }
         button.secondary { background: #334155; }
         button.secondary:hover { background: #475569; }
-        .result { margin-top: 25px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; display: none; }
-        .result h3 { color: #38bdf8; margin-top: 0; }
-        ul { padding-left: 20px; margin: 10px 0; }
-        li { margin-bottom: 6px; color: #cbd5e1; }
+        button.danger { background: #7f1d1d; font-size: 12px; padding: 6px; flex: unset; }
+        .result { margin-top: 20px; background: #0f172a; padding: 18px; border-radius: 10px; border: 1px solid #1e293b; display: none; }
+        .result h3 { color: #38bdf8; margin-top: 0; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 8px; }
+        ul { padding-left: 18px; margin: 8px 0; }
+        li { margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
         .highlight { color: #4ade80; font-weight: bold; }
-        .chart-container { position: relative; margin-top: 20px; height: 250px; width: 100%; }
-        .history-box { margin-top: 25px; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; display: none; }
-        .history-item { padding: 8px; border-bottom: 1px solid #334155; font-size: 13px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
+        .chart-box { position: relative; margin-top: 15px; height: 220px; width: 100%; }
+        .history-box { margin-top: 20px; background: #162032; padding: 12px; border-radius: 8px; border: 1px solid #1f2937; display: none; }
+        .history-item { padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
         .history-item span { color: #f8fafc; }
+        .badge { background: #0369a1; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
         @media print {
             body { background: white; color: black; }
             .container { box-shadow: none; border: none; width: 100%; margin: 0; }
@@ -40,61 +43,88 @@
 </head>
 <body>
     <div class="container">
-        <h1>InvestMind AI</h1>
-        <p class="subtitle">Plataforma Inteligente de Alocação e Projeção de Portfólio</p>
+        <h1>InvestMind AI <span class="badge">PRO</span></h1>
+        <p class="subtitle">Robo-Advisor Autónomo & Suite de Inteligência Financeira</p>
         
-        <div class="form-group">
-            <label>Capital Inicial (R$)</label>
-            <input type="number" id="capital" placeholder="Ex: 10000" value="10000">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Capital Inicial (R$)</label>
+                <input type="number" id="capital" value="15000">
+            </div>
+            <div class="form-group">
+                <label>Aporte Mensal (R$)</label>
+                <input type="number" id="monthly" value="800">
+            </div>
         </div>
-        <div class="form-group">
-            <label>Aporte Mensal (R$)</label>
-            <input type="number" id="monthly" placeholder="Ex: 500" value="500">
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Perfil de Risco</label>
+                <select id="risk">
+                    <option value="conservador">Conservador (Renda Fixa)</option>
+                    <option value="moderado" selected>Moderado (Equilibrado)</option>
+                    <option value="arrojado">Arrojado (Crescimento Global)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cenário Macroeconômico</label>
+                <select id="macro">
+                    <option value="normal">Normal (Taxas Atuais)</option>
+                    <option value="alta_selic" selected>Juros Altos (Bons para Renda Fixa)</option>
+                    <option value="boom_bolsa">Boom Tecnológico / Ações</option>
+                </select>
+            </div>
         </div>
+
         <div class="form-group">
-            <label>Perfil de Risco</label>
-            <select id="risk">
-                <option value="conservador">Conservador (Foco em Renda Fixa)</option>
-                <option value="moderado" selected>Moderado (Equilíbrio Dinâmico)</option>
-                <option value="arrojado">Arrojado (Crescimento e Exposição Global)</option>
-            </select>
+            <label>Meta de Patrimônio Desejada (R$)</label>
+            <input type="number" id="goal" value="100000">
         </div>
+
         <div class="btn-group">
-            <button onclick="analyze()">Gerar Análise</button>
-            <button class="secondary" onclick="window.print()">Exportar PDF</button>
+            <button onclick="analyze()">Executar Análise Completa</button>
+            <button class="secondary" onclick="window.print()">Exportar Relatório PDF</button>
         </div>
 
         <div id="resultBox" class="result">
-            <h3>Plano de Alocação Estratégico</h3>
-            <p><strong>Instituição Recomendada:</strong> <span id="resInst" class="highlight"></span></p>
-            <p><strong>Distribuição de Ativos:</strong></p>
+            <h3>Relatório Estratégico de Alocação</h3>
+            <p><strong>Plataforma Indicada:</strong> <span id="resInst" class="highlight"></span></p>
+            <p><strong>Composição do Portfólio:</strong></p>
             <ul id="resAlloc"></ul>
-            <p><strong>Projeção (1 Ano):</strong> <span id="resProj" class="highlight"></span></p>
+            <p><strong>Projeção a 1 Ano:</strong> <span id="resProj" class="highlight"></span></p>
+            <p><strong>Tempo Estimado para Meta (R$ <span id="goalLabel"></span>):</strong> <span id="resGoalTime" class="highlight"></span></p>
             
-            <div class="chart-container">
+            <div class="chart-box">
                 <canvas id="growthChart"></canvas>
+            </div>
+            <div class="chart-box" style="margin-top: 30px;">
+                <canvas id="doughnutChart"></canvas>
             </div>
         </div>
 
         <div id="historyBox" class="history-box">
-            <h4 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 14px;">Simulações Anteriores</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Histórico de Simulações</h4>
+                <button class="danger" onclick="clearHistory()">Limpar</button>
+            </div>
             <div id="historyList"></div>
         </div>
     </div>
 
     <script>
-        let myChart = null;
+        let lineChart = null;
+        let doughnutChart = null;
 
         function saveHistory(data, capital, risk) {
-            let history = JSON.parse(localStorage.getItem('investmind_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_pro_history') || '[]');
             history.unshift({ date: new Date().toLocaleDateString(), capital, risk, projected: data.projectedValue1Year });
             if (history.length > 5) history.pop();
-            localStorage.setItem('investmind_history', JSON.stringify(history));
+            localStorage.setItem('investmind_pro_history', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('investmind_history') || '[]');
+            let history = JSON.parse(localStorage.getItem('investmind_pro_history') || '[]');
             const box = document.getElementById('historyBox');
             const list = document.getElementById('historyList');
             if (history.length === 0) { box.style.display = 'none'; return; }
@@ -109,10 +139,19 @@
             box.style.display = 'block';
         }
 
+        function clearHistory() {
+            localStorage.removeItem('investmind_pro_history');
+            loadHistory();
+        }
+
         async function analyze() {
-            const capital = document.getElementById('capital').value;
-            const monthlyContribution = document.getElementById('monthly').value;
+            const capital = Number(document.getElementById('capital').value);
+            const monthlyContribution = Number(document.getElementById('monthly').value);
             const riskTolerance = document.getElementById('risk').value;
+            const macro = document.getElementById('macro').value;
+            const goal = Number(document.getElementById('goal').value);
+            
+            document.getElementById('goalLabel').innerText = goal.toLocaleString();
 
             const res = await fetch('/api/analyze', {
                 method: 'POST',
@@ -124,38 +163,54 @@
             if(data.status === 'success') {
                 const r = data.report;
                 document.getElementById('resInst').innerText = r.recommendedPlatform;
-                document.getElementById('resProj').innerText = 'R$ ' + r.projectedValue1Year;
                 
+                // Ajuste macroeconômico na projeção
+                let multiplier = macro === 'alta_selic' ? 1.02 : macro === 'boom_bolsa' ? 1.05 : 1.0;
+                let adjustedProj = (Number(r.projectedValue1Year) * multiplier).toFixed(2);
+                document.getElementById('resProj').innerText = 'R$ ' + adjustedProj;
+
+                // Cálculo do tempo para atingir a meta
+                let currentVal = capital;
+                let months = 0;
+                let monthlyRate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
+                while(currentVal < goal && months < 360) {
+                    currentVal = (currentVal + monthlyContribution) * (1 + monthlyRate);
+                    months++;
+                }
+                let yearsTime = (months / 12).toFixed(1);
+                document.getElementById('resGoalTime').innerText = months >= 360 ? 'Mais de 30 anos' : `${months} meses (~${yearsTime} anos)`;
+
                 const ul = document.getElementById('resAlloc');
                 ul.innerHTML = '';
+                let allocLabels = [];
+                let allocValues = [];
                 for (const [key, value] of Object.entries(r.strategicAllocation)) {
                     const li = document.createElement('li');
                     li.innerHTML = `<strong>${key}:</strong> ${value}`;
                     ul.appendChild(li);
+                    allocLabels.push(key);
+                    allocValues.push(parseInt(value));
                 }
                 document.getElementById('resultBox').style.display = 'block';
 
-                // Render Chart
-                const ctx = document.getElementById('growthChart').getContext('2d');
-                if (myChart) myChart.destroy();
+                // Render Line Chart (Evolução 1 Ano)
+                const ctxLine = document.getElementById('growthChart').getContext('2d');
+                if (lineChart) lineChart.destroy();
                 
-                let baseVal = Number(capital);
-                let monthly = Number(monthlyContribution);
-                let rate = riskTolerance === 'conservador' ? 0.009 : riskTolerance === 'moderado' ? 0.011 : 0.013;
+                let baseVal = capital;
                 let labels = ['Início', 'Mês 3', 'Mês 6', 'Mês 9', 'Mês 12'];
                 let values = [baseVal];
-                
                 for(let i=1; i<=4; i++) {
-                    baseVal = (baseVal + monthly * 3) * Math.pow(1 + rate, 3);
+                    baseVal = (baseVal + monthlyContribution * 3) * Math.pow(1 + monthlyRate, 3) * multiplier;
                     values.push(baseVal.toFixed(2));
                 }
 
-                myChart = new Chart(ctx, {
+                lineChart = new Chart(ctxLine, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Evolução do Patrimônio (R$)',
+                            label: 'Evolução Patrimonial (R$)',
                             data: values,
                             borderColor: '#38bdf8',
                             backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -164,17 +219,35 @@
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { labels: { color: '#f8fafc' } } },
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#f8fafc', font: { size: 11 } } } },
                         scales: {
-                            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
-                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
+                            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
                         }
                     }
                 });
 
-                saveHistory(r, capital, riskTolerance);
+                // Render Doughnut Chart (Alocação)
+                const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+                if (doughnutChart) doughnutChart.destroy();
+
+                doughnutChart = new Chart(ctxDoughnut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: allocLabels,
+                        datasets: [{
+                            data: allocValues,
+                            backgroundColor: ['#0284c7', '#38bdf8', '#34d399', '#facc15', '#f87171']
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc', font: { size: 11 } } } }
+                    }
+                });
+
+                saveHistory({ projectedValue1Year: adjustedProj }, capital, riskTolerance);
             } else {
                 alert('Erro ao processar análise.');
             }

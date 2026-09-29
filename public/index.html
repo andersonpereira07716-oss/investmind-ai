@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestMind AI - Robo-Advisor</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 40px auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h1 { color: #38bdf8; text-align: center; font-size: 24px; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #0369a1; }
+        .result { margin-top: 25px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; display: none; }
+        .result h3 { color: #38bdf8; margin-top: 0; }
+        ul { padding-left: 20px; margin: 10px 0; }
+        li { margin-bottom: 6px; color: #cbd5e1; }
+        .highlight { color: #4ade80; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>InvestMind AI</h1>
+        <p class="subtitle">Seu Agente de Inteligência Financeira e Alocação de Portfólio</p>
+        
+        <div class="form-group">
+            <label>Capital Inicial (R$)</label>
+            <input type="number" id="capital" placeholder="Ex: 10000" value="10000">
+        </div>
+        <div class="form-group">
+            <label>Aporte Mensal (R$)</label>
+            <input type="number" id="monthly" placeholder="Ex: 500" value="500">
+        </div>
+        <div class="form-group">
+            <label>Perfil de Risco</label>
+            <select id="risk">
+                <option value="conservador">Conservador (Foco em Renda Fixa e Baixo Risco)</option>
+                <option value="moderado" selected>Moderado (Equilíbrio entre Renda Fixa e Variável)</option>
+                <option value="arrojado">Arrojado (Foco em Crescimento e Alta Exposição)</option>
+            </select>
+        </div>
+        <button onclick="analyze()">Gerar Estratégia de Investimento</button>
+
+        <div id="resultBox" class="result">
+            <h3>Plano de Alocação Recomendado</h3>
+            <p><strong>Instituição Sugerida:</strong> <span id="resInst" class="highlight"></span></p>
+            <p><strong>Alocação Estratégica:</strong></p>
+            <ul id="resAlloc"></ul>
+            <p><strong>Projeção Estimada (1 Ano):</strong> <span id="resProj" class="highlight"></span></p>
+        </div>
+    </div>
+
+    <script>
+        async function analyze() {
+            const capital = document.getElementById('capital').value;
+            const monthlyContribution = document.getElementById('monthly').value;
+            const riskTolerance = document.getElementById('risk').value;
+
+            const res = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ capital, riskTolerance, monthlyContribution })
+            });
+            const data = await res.json();
+            
+            if(data.status === 'success') {
+                const r = data.report;
+                document.getElementById('resInst').innerText = r.recommendedPlatform;
+                document.getElementById('resProj').innerText = 'R$ ' + r.projectedValue1Year;
+                
+                const ul = document.getElementById('resAlloc');
+                ul.innerHTML = '';
+                for (const [key, value] of Object.entries(r.strategicAllocation)) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${key}:</strong> ${value}`;
+                    ul.appendChild(li);
+                }
+                document.getElementById('resultBox').style.display = 'block';
+            } else {
+                alert('Erro ao processar análise.');
+            }
+        }
+    </script>
+</body>
+</html>

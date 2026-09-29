@@ -1,17 +1,14 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { analyzeInvestmentProfile } from './agentCore.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'online', 
-    name: 'InvestMind-AI API', 
-    description: 'Agente de Inteligência Financeira e Robo-Advisor',
-    endpoints: ['POST /api/analyze'] 
-  });
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/analyze', (req, res) => {
   try {

@@ -20,7 +20,7 @@ export default function InvestMindEliteUI() {
   const [carregando, setCarregando] = useState<boolean>(false);
   const [resultado, setResultado] = useState<any>(null);
   const [historico, setHistorico] = useState<any[]>(() => {
-    try { return JSON.parse(localStorage.getItem('im_historico') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('im_historico_v2') || '[]'); } catch { return []; }
   });
   const [cenarioEstresse, setCenarioEstresse] = useState<string>('Normal');
   const [notificacaoEnviada, setNotificacaoEnviada] = useState<boolean>(false);
@@ -35,7 +35,7 @@ export default function InvestMindEliteUI() {
     localStorage.setItem('im_custo', custoVida.toString());
     localStorage.setItem('im_inst', instituicao);
     localStorage.setItem('im_moeda', moeda);
-    localStorage.setItem('im_historico', JSON.stringify(historico));
+    localStorage.setItem('im_historico_v2', JSON.stringify(historico));
   }, [capital, aporte, perfil, exposicao, meta, custoVida, instituicao, moeda, historico]);
 
   const formatarMoeda = (val: number) => {
@@ -160,7 +160,7 @@ export default function InvestMindEliteUI() {
       <html>
         <head><title>InvestMind AI - Relatório Executivo Master</title></head>
         <body style="font-family: Arial; padding: 25px; background: #0f172a; color: #f8fafc;">
-          <h1 style="color: #38bdf8;">InvestMind AI - Relatório Executivo Nota 10</h1>
+          <h1 style="color: #38bdf8;">InvestMind AI - Relatório Executivo Master v2</h1>
           <p><strong>Instituição:</strong> ${resultado.estado.instituicao} | <strong>Perfil:</strong> ${resultado.estado.perfilRisco}</p>
           <p><strong>Cenário de Estresse:</strong> ${resultado.cenarioEstresse}</p>
           <hr style="border-color: #334155;"/>
@@ -181,17 +181,17 @@ export default function InvestMindEliteUI() {
 
   const enviarWhatsApp = () => {
     if (!resultado) return;
-    const texto = encodeURIComponent(`*InvestMind AI - Enterprise Report*\nPatrimônio Projetado: ${formatarMoeda(resultado.monteCarlo.mediano)}\nRenda Passiva: ${formatarMoeda(resultado.rendaPassivaMensal)}/mês`);
+    const texto = encodeURIComponent(`*InvestMind AI - Enterprise Report v2*\nPatrimônio Projetado: ${formatarMoeda(resultado.monteCarlo.mediano)}\nRenda Passiva: ${formatarMoeda(resultado.rendaPassivaMensal)}/mês`);
     window.open(`https://api.whatsapp.com/send?phone=${telefone}&text=${texto}`, '_blank');
     setNotificacaoEnviada(true);
   };
 
   return (
-    <div className="p-6 bg-slate-950 text-slate-100 rounded-2xl max-w-4xl mx-auto space-y-6 shadow-2xl border border-slate-900">
+    <div className="p-6 bg-slate-950 text-slate-100 rounded-2xl max-w-4xl mx-auto space-y-6 shadow-2xl border border-cyan-900/50">
       <div className="border-b border-slate-800 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Enterprise Edition</span></h2>
-          <p className="text-sm text-slate-400">Robo-Advisor com Simulação de Stress, Gráfico Canvas & Motor FIRE</p>
+          <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">MASTER v2.0</span></h2>
+          <p className="text-sm text-slate-400">Plataforma de Riqueza com Stress Test, Canvas & IA Ativa</p>
         </div>
         <div>
           <select value={moeda} onChange={e => setMoeda(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 text-xs rounded p-2 font-bold">
@@ -248,7 +248,7 @@ export default function InvestMindEliteUI() {
         <button 
           onClick={executarAnaliseProfissional} 
           disabled={carregando}
-          className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-xl transition shadow-lg shadow-cyan-900/30 flex justify-center items-center gap-2"
+          className="flex-1 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 font-bold rounded-xl transition shadow-lg shadow-cyan-900/40 flex justify-center items-center gap-2 text-white text-sm"
         >
           {carregando ? (
             <>
@@ -256,10 +256,10 @@ export default function InvestMindEliteUI() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
-              Processando IA...
+              Processando IA Master...
             </>
           ) : (
-            'Executar Análise Enterprise'
+            '⚡ Executar Análise Master v2.0'
           )}
         </button>
         {resultado && (
@@ -325,7 +325,7 @@ export default function InvestMindEliteUI() {
       {historico.length > 0 && (
         <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-slate-300">📊 Histórico de Simulações Recentes</span>
+            <span className="font-bold text-slate-300">📊 Histórico de Simulações Master v2</span>
             <button onClick={() => setHistorico([])} className="text-red-400 hover:underline">Limpar</button>
           </div>
           <div className="space-y-1">

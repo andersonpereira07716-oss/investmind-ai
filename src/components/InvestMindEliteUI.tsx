@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   runMonteCarloSimulation, 
   getAssetAllocation, 
@@ -19,9 +19,13 @@ export default function InvestMindEliteUI() {
   const [telefone, setTelefone] = useState<string>('');
   const [carregando, setCarregando] = useState<boolean>(false);
   const [resultado, setResultado] = useState<any>(null);
+  const [historico, setHistorico] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem('im_historico') || '[]'); } catch { return []; }
+  });
+  const [cenarioEstresse, setCenarioEstresse] = useState<string>('Normal');
   const [notificacaoEnviada, setNotificacaoEnviada] = useState<boolean>(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Persistir preferências no LocalStorage
   useEffect(() => {
     localStorage.setItem('im_capital', capital.toString());
     localStorage.setItem('im_aporte', aporte.toString());
@@ -31,7 +35,8 @@ export default function InvestMindEliteUI() {
     localStorage.setItem('im_custo', custoVida.toString());
     localStorage.setItem('im_inst', instituicao);
     localStorage.setItem('im_moeda', moeda);
-  }, [capital, aporte, perfil, exposicao, meta, custoVida, instituicao, moeda]);
+    localStorage.setItem('im_historico', JSON.stringify(historico));
+  }, [capital, aporte, perfil, exposicao, meta, custoVida, instituicao, moeda, historico]);
 
   const formatarMoeda = (val: number) => {
     return `${moeda} ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
@@ -40,6 +45,10 @@ export default function InvestMindEliteUI() {
   const executarAnaliseProfissional = () => {
     setCarregando(true);
     setTimeout(() => {
+      let fatorStress = 1.0;
+      if (cenarioEstresse === 'Crise Global') fatorStress = 0.85;
+      if (cenarioEstresse === 'Juros Altos (14%)') fatorStress = 1.08;
+
       const estado = {
         capitalInicial: capital,
         aporteMensal: aporte,
@@ -53,6 +62,9 @@ export default function InvestMindEliteUI() {
       };
 
       const monteCarlo = runMonteCarloSimulation(estado, 20);
+      monteCarlo.mediano *= fatorStress;
+      monteCarlo.pessimista *= fatorStress;
+
       const alocacao = getAssetAllocation(perfil, exposicao);
       const metasFire = calcularMetasFIRE(custoVida, capital);
       
@@ -67,7 +79,7 @@ export default function InvestMindEliteUI() {
       const rendaPassivaAnual = monteCarlo.mediano * 0.04;
       const rendaPassivaMensal = rendaPassivaAnual / 12;
 
-      setResultado({ 
+      const novoResultado = { 
         monteCarlo, 
         alocacao, 
         metasFire, 
@@ -75,26 +87,91 @@ export default function InvestMindEliteUI() {
         alertas, 
         rebalanceamento, 
         rendaPassivaMensal,
-        estado 
-      });
+        cenarioEstresse,
+        estado,
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+
+      setResultado(novoResultado);
+      setHistorico(prev => [ { data: novoResultado.data, capital, perfil, patrimonioFinal: monteCarlo.mediano }, ...prev.slice(0, 4) ]);
       setCarregando(false);
       setNotificacaoEnviada(false);
     }, 400);
   };
 
+  // Desenhar Gráfico em Canvas após renderizar resultado
+  useEffect(() => {
+    if (!resultado || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const anos = [0, 5, 10, 15, 20];
+    const valores = [
+      capital,
+      capital + aporte * 60 * 1.3,
+      capital + aporte * 120 * 1.6,
+      capital + aporte * 180 * 2.1,
+      resultado.monteCarlo.mediano
+    ];
+
+    const maxVal = Math.max(...valores);
+    const w = canvas.width;
+    const h = canvas.height;
+    const padding = 30;
+
+    // Linha de Grade
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      const y = padding + (h - 2 * padding) * (i / 3);
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(w - padding, y);
+      ctx.stroke();
+    }
+
+    // Curva de Crescimento
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    anos.forEach((_, idx) => {
+      const x = padding + (idx / (anos.length - 1)) * (w - 2 * padding);
+      const y = h - padding - ((valores[idx] / maxVal) * (h - 2 * padding));
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Pontos
+    anos.forEach((ano, idx) => {
+      const x = padding + (idx / (anos.length - 1)) * (w - 2 * padding);
+      const y = h - padding - ((valores[idx] / maxVal) * (h - 2 * padding));
+      ctx.fillStyle = '#06b6d4';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px sans-serif';
+      ctx.fillText(`${ano}a`, x - 8, h - 10);
+    });
+  }, [resultado]);
+
   const exportarPDF = () => {
     if (!resultado) return;
     const conteudoHtml = `
       <html>
-        <head><title>InvestMind AI - Executive Report</title></head>
-        <body style="font-family: Arial; padding: 20px; background: #0f172a; color: #f8fafc;">
+        <head><title>InvestMind AI - Relatório Executivo Master</title></head>
+        <body style="font-family: Arial; padding: 25px; background: #0f172a; color: #f8fafc;">
           <h1 style="color: #38bdf8;">InvestMind AI - Relatório Executivo Nota 10</h1>
           <p><strong>Instituição:</strong> ${resultado.estado.instituicao} | <strong>Perfil:</strong> ${resultado.estado.perfilRisco}</p>
+          <p><strong>Cenário de Estresse:</strong> ${resultado.cenarioEstresse}</p>
           <hr style="border-color: #334155;"/>
-          <h3>Projeção & Renda Passiva FIRE (${moeda})</h3>
+          <h3>Projeção de Patrimônio & Renda Passiva (${moeda})</h3>
           <p>Patrimônio Mediano (20 anos): ${formatarMoeda(resultado.monteCarlo.mediano)}</p>
           <p>Renda Passiva Mensal Estimada: ${formatarMoeda(resultado.rendaPassivaMensal)}</p>
-          <p>Anos para Atingir a Meta FIRE: ${resultado.metasFire.anosNecessarios.toFixed(1)} anos</p>
+          <p>Prazo para Atingir Meta FIRE: ${resultado.metasFire.anosNecessarios.toFixed(1)} anos</p>
         </body>
       </html>
     `;
@@ -108,7 +185,7 @@ export default function InvestMindEliteUI() {
 
   const enviarWhatsApp = () => {
     if (!resultado) return;
-    const texto = encodeURIComponent(`*InvestMind AI - Executive Report*\nPatrimônio Projetado: ${formatarMoeda(resultado.monteCarlo.mediano)}\nRenda Passiva Mensal: ${formatarMoeda(resultado.rendaPassivaMensal)}`);
+    const texto = encodeURIComponent(`*InvestMind AI - Enterprise Report*\nPatrimônio Projetado: ${formatarMoeda(resultado.monteCarlo.mediano)}\nRenda Passiva: ${formatarMoeda(resultado.rendaPassivaMensal)}/mês`);
     window.open(`https://api.whatsapp.com/send?phone=${telefone}&text=${texto}`, '_blank');
     setNotificacaoEnviada(true);
   };
@@ -118,7 +195,7 @@ export default function InvestMindEliteUI() {
       <div className="border-b border-slate-800 pb-4 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-cyan-400">InvestMind AI <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-800">Enterprise Edition</span></h2>
-          <p className="text-sm text-slate-400">Robo-Advisor com Persistência Local, Motor FIRE & Alocação Dinâmica</p>
+          <p className="text-sm text-slate-400">Robo-Advisor com Simulação de Stress, Gráfico Canvas & Motor FIRE</p>
         </div>
         <div>
           <select value={moeda} onChange={e => setMoeda(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 text-xs rounded p-2 font-bold">
@@ -158,8 +235,12 @@ export default function InvestMindEliteUI() {
           </select>
         </div>
         <div>
-          <label className="text-xs text-slate-400">Meta de Patrimônio ({moeda})</label>
-          <input type="number" value={meta} onChange={e => setMeta(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
+          <label className="text-xs text-slate-400">Cenário de Estresse Econômico</label>
+          <select value={cenarioEstresse} onChange={e => setCenarioEstresse(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-cyan-300 font-bold">
+            <option value="Normal">Normal (Expectativa de Mercado)</option>
+            <option value="Crise Global">Crise Global (-15% Volatilidade)</option>
+            <option value="Juros Altos (14%)">Juros Altos (+8% Rendimento)</option>
+          </select>
         </div>
         <div>
           <label className="text-xs text-slate-400">Custo de Vida / Mês ({moeda})</label>
@@ -194,14 +275,19 @@ export default function InvestMindEliteUI() {
 
       {resultado && (
         <div className="space-y-4 bg-slate-900/90 p-5 rounded-xl border border-slate-800 animate-fadeIn">
-          <h3 className="text-lg font-semibold text-cyan-300">📈 Executive Intelligence Dashboard</h3>
+          <h3 className="text-lg font-semibold text-cyan-300">📈 Dashboard Analítico & Gráfico de Evolução</h3>
           
+          <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 flex flex-col items-center">
+            <span className="text-xs text-slate-400 mb-2">Curva Projetada de Acumulação Patrimonial (0 a 20 Anos)</span>
+            <canvas ref={canvasRef} width={600} height={180} className="w-full h-auto max-h-[180px] rounded"></canvas>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-              <h4 className="font-bold text-slate-300 mb-1">🏖️ Simulador de Renda Passiva FIRE</h4>
+              <h4 className="font-bold text-slate-300 mb-1">🏖️ Simulador FIRE & Renda Passiva</h4>
               <p className="text-emerald-400 font-bold text-base">{formatarMoeda(resultado.rendaPassivaMensal)} / mês</p>
-              <p className="text-xs text-slate-400">Calculado via Regra dos 4% a.a. sobre o montante mediano projetado em 20 anos ({formatarMoeda(resultado.monteCarlo.mediano)}).</p>
-              <p className="text-xs text-cyan-400 pt-1">⏳ Prazo estimado para independência financeira: <strong>{resultado.metasFire.anosNecessarios.toFixed(1)} anos</strong>.</p>
+              <p className="text-xs text-slate-400">Regra de 4% a.a. sobre o patrimônio acumulado em 20 anos ({formatarMoeda(resultado.monteCarlo.mediano)}).</p>
+              <p className="text-xs text-cyan-400 pt-1">⏳ Prazo estimado FIRE: <strong>{resultado.metasFire.anosNecessarios.toFixed(1)} anos</strong>.</p>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
@@ -221,7 +307,7 @@ export default function InvestMindEliteUI() {
 
           <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="w-full">
-              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Compartilhar Relatório no WhatsApp</h4>
+              <h4 className="font-bold text-slate-300 text-sm mb-1">💬 Enviar Relatório via WhatsApp</h4>
               <input 
                 type="text" 
                 placeholder="Seu WhatsApp (ex: 5583999999999)" 
@@ -236,6 +322,23 @@ export default function InvestMindEliteUI() {
             >
               {notificacaoEnviada ? '✅ Enviado!' : 'Enviar Relatório'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {historico.length > 0 && (
+        <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-slate-300">📊 Histórico de Simulações Recentes</span>
+            <button onClick={() => setHistorico([])} className="text-red-400 hover:underline">Limpar</button>
+          </div>
+          <div className="space-y-1">
+            {historico.map((h, i) => (
+              <div key={i} className="flex justify-between bg-slate-950 p-2 rounded border border-slate-800/60">
+                <span className="text-slate-400">{h.data} — R$ {h.capital.toLocaleString()} ({h.perfil})</span>
+                <span className="text-cyan-400 font-bold">Projeção: R$ {Math.round(h.patrimonioFinal).toLocaleString()}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}

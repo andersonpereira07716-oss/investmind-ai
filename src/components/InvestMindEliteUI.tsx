@@ -99,7 +99,6 @@ export default function InvestMindEliteUI() {
     }, 400);
   };
 
-  // Desenhar Gráfico em Canvas após renderizar resultado
   useEffect(() => {
     if (!resultado || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -121,7 +120,6 @@ export default function InvestMindEliteUI() {
     const h = canvas.height;
     const padding = 30;
 
-    // Linha de Grade
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
     for (let i = 0; i < 4; i++) {
@@ -132,7 +130,6 @@ export default function InvestMindEliteUI() {
       ctx.stroke();
     }
 
-    // Curva de Crescimento
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -144,7 +141,6 @@ export default function InvestMindEliteUI() {
     });
     ctx.stroke();
 
-    // Pontos
     anos.forEach((ano, idx) => {
       const x = padding + (idx / (anos.length - 1)) * (w - 2 * padding);
       const y = h - padding - ((valores[idx] / maxVal) * (h - 2 * padding));
